@@ -10,4 +10,10 @@
     <ProjectReference Include="..\SmartCharger.Data\SmartCharger.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>
