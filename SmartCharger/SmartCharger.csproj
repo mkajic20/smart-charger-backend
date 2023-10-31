@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartCharger.Business\SmartCharger.Business.csproj" />
+    <ProjectReference Include="..\SmartCharger.Data\SmartCharger.Data.csproj" />
   </ItemGroup>
 
 </Project>
