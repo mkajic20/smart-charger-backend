@@ -9,7 +9,7 @@ namespace SmartCharger.Data.Entities
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public  DateTime Created { get; set; }
-        public  DateTime LastSync { get; set; }
+        public  DateTime? LastSync { get; set; }
         public bool Active { get; set; }
 
         [ForeignKey(nameof(User))]
