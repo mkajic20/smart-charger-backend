@@ -9,6 +9,6 @@ namespace SmartCharger.Business.Interfaces
 {
     public interface IRegisterService
     {
-        Task<RegisterResponseDTO> Register(RegisterDTO registerDTO);
+        Task<RegisterResponseDTO> RegisterAsync(RegisterDTO registerDTO);
     }
 }
