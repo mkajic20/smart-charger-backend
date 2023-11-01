@@ -21,8 +21,4 @@
     <ProjectReference Include="..\SmartCharger.Data\SmartCharger.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>

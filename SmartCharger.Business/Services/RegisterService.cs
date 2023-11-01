@@ -68,7 +68,7 @@ namespace SmartCharger.Business.Services
                 Email = registerDTO.Email,
                 Password = hashedPassword,
                 Active = true,
-                CreationTime = DateTime.Now,
+                CreationTime = DateTime.Now.ToUniversalTime(),
                 Salt = salt,
                 RoleId = 2
             };
