@@ -40,6 +40,12 @@ namespace SmartCharger.Business.Services
                 return response;
             }
 
+            if (user.Active == false)
+            {
+                response.Error = "This account is disabled.";
+                return response;
+            }
+
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginDTO.Password, user.Password);
 
             if (!isPasswordValid)

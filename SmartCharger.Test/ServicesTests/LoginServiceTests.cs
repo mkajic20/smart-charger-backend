@@ -83,6 +83,41 @@ namespace SmartCharger.Test.ServicesTests
             }
         }
 
+        [Fact]
+        public async Task LoginAsync_WhenUserAccountIsDisabledAndValidCredentials_ShouldReturnError()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "LoginServiceDatabase")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            var loginDTO = new LoginDTO
+            {
+                Email = "iivic2@example.com",
+                Password = "password123"
+            };
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var loginService = new LoginService(context);
+
+                // Act
+                LoginResponseDTO result = await loginService.LoginAsync(loginDTO);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("Login failed.", result.Message);
+                Assert.Equal("This account is disabled.", result.Error);
+                Assert.Null(result.User);
+                Assert.Null(result.Token);
+            }
+        }
+
         private void SetupDatabase(SmartChargerContext context)
         {
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
@@ -95,6 +130,18 @@ namespace SmartCharger.Test.ServicesTests
                 Email = "iivic@example.com",
                 Password = hashedPassword,
                 Active = true,
+                CreationTime = DateTime.Now.ToUniversalTime(),
+                Salt = salt,
+                RoleId = 2
+            });
+
+            context.Users.Add(new User
+            {
+                FirstName = "Ivo",
+                LastName = "Ivic",
+                Email = "iivic2@example.com",
+                Password = hashedPassword,
+                Active = false,
                 CreationTime = DateTime.Now.ToUniversalTime(),
                 Salt = salt,
                 RoleId = 2
