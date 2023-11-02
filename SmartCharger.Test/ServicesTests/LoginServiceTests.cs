@@ -18,7 +18,7 @@ namespace SmartCharger.Test.ServicesTests
         {
             // Arrange
             var options = new DbContextOptionsBuilder<SmartChargerContext>()
-                .UseInMemoryDatabase(databaseName: "RegisterServiceDatabase")
+                .UseInMemoryDatabase(databaseName: "LoginServiceDatabase")
                 .Options;
 
             using (var context = new SmartChargerContext(options))
@@ -53,7 +53,7 @@ namespace SmartCharger.Test.ServicesTests
         {
             // Arrange
             var options = new DbContextOptionsBuilder<SmartChargerContext>()
-                .UseInMemoryDatabase(databaseName: "RegisterServiceDatabase")
+                .UseInMemoryDatabase(databaseName: "LoginServiceDatabase")
                 .Options;
 
             using (var context = new SmartChargerContext(options))
