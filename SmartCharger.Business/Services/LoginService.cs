@@ -17,62 +17,43 @@ namespace SmartCharger.Business.Services
         { }
         public async Task<LoginResponseDTO> LoginAsync(LoginDTO loginDTO)
         {
+            var response = new LoginResponseDTO { Success = false, Message = "Login failed." };
             AuthService authService = new AuthService();
 
             if (!authService.IsValidEmail(loginDTO.Email))
             {
-                return new LoginResponseDTO
-                {
-                    Success = false,
-                    Message = "Login failed.",
-                    Error = "Email is not valid."
-                };
+                response.Error = "Email is not valid.";
+                return response;
             }
 
             if (loginDTO.Password.Length < 6)
             {
-                return new LoginResponseDTO
-                {
-                    Success = false,
-                    Message = "Login failed.",
-                    Error = "Password must have at least 6 characters."
-                };
+                response.Error = "Password must have at least 6 characters.";
+                return response;
             }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDTO.Email);
 
             if (user == null)
             {
-                return new LoginResponseDTO
-                {
-                    Success = false,
-                    Message = "Login failed.",
-                    Error = "This email is not registered."
-                };
+                response.Error = "This email is not registered.";
+                return response;
             }
 
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginDTO.Password, user.Password);
 
             if (!isPasswordValid)
             {
-                return new LoginResponseDTO
-                {
-                    Success = false,
-                    Message = "Login failed.",
-                    Error = "Invalid credentials."
-                };
+                response.Error = "Invalid credentials.";
+                return response;
             }
 
             string jwt = authService.GenerateJWT(user);
 
             if (jwt == null)
             {
-                return new LoginResponseDTO
-                {
-                    Success = false,
-                    Message = "Login failed.",
-                    Error = "Problem with creating JWT."
-                };
+                response.Error = "Problem with creating JWT.";
+                return response;
             }
 
             return new LoginResponseDTO
