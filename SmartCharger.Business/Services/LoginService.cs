@@ -17,13 +17,25 @@ namespace SmartCharger.Business.Services
         { }
         public async Task<LoginResponseDTO> LoginAsync(LoginDTO loginDTO)
         {
-            if (loginDTO.Email.Length < 1 || loginDTO.Password.Length < 1)
+            AuthService authService = new AuthService();
+
+            if (!authService.IsValidEmail(loginDTO.Email))
             {
                 return new LoginResponseDTO
                 {
                     Success = false,
                     Message = "Login failed.",
-                    Error = "Invalid credentials."
+                    Error = "Email is not valid."
+                };
+            }
+
+            if (loginDTO.Password.Length < 6)
+            {
+                return new LoginResponseDTO
+                {
+                    Success = false,
+                    Message = "Login failed.",
+                    Error = "Password must have at least 6 characters."
                 };
             }
 
@@ -50,8 +62,6 @@ namespace SmartCharger.Business.Services
                     Error = "Invalid credentials."
                 };
             }
-
-            AuthService authService = new AuthService();
 
             string jwt = authService.GenerateJWT(user);
 

@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SmartCharger.Business.Services
@@ -32,6 +33,19 @@ namespace SmartCharger.Business.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        public bool IsValidEmail(string email)
+        {
+            try
+            {
+                return Regex.IsMatch(email,
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }
