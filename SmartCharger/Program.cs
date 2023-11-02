@@ -25,6 +25,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
         };
     });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireClaim("roleId", "1"));
+    options.AddPolicy("Customer", policy => policy.RequireClaim("roleId", "2"));
+});
 builder.Services.AddDbContext<SmartChargerContext>(option => option.UseNpgsql(builder.Configuration.GetConnectionString("connection")));
 builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
