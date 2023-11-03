@@ -80,6 +80,8 @@ namespace SmartCharger.Business.Services
             }
         }
 
+
+
         public async Task<SingleUserResponseDTO> UpdateActiveStatus(int userId)
         {
             try
