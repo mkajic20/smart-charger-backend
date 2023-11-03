@@ -18,7 +18,9 @@ namespace SmartCharger.Business.Services
         { }
         public async Task<RegisterResponseDTO> RegisterAsync(RegisterDTO registerDTO)
         {
-            if (!IsValidEmail(registerDTO.Email))
+            AuthService authService = new AuthService();
+
+            if (!authService.IsValidEmail(registerDTO.Email))
             {
                 return new RegisterResponseDTO
                 {
@@ -87,20 +89,6 @@ namespace SmartCharger.Business.Services
                     Email = registerDTO.Email
                 }
             };
-        }
-
-        private bool IsValidEmail(string email)
-        {
-            try
-            {
-                return Regex.IsMatch(email,
-                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
-            }
-            catch (Exception)
-            {
-                return false;
-            }
         }
     }
 }
