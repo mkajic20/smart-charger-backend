@@ -19,15 +19,15 @@ namespace SmartCharger.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
-            LoginResponseDTO registrationResult = await _loginService.LoginAsync(loginDTO);
+            LoginResponseDTO loginResult = await _loginService.LoginAsync(loginDTO);
 
-            if (registrationResult.Success == true)
+            if (loginResult.Success == true)
             {
-                return Ok(registrationResult);
+                return Ok(loginResult);
             }
             else
             {
-                return Unauthorized(registrationResult);
+                return Unauthorized(loginResult);
             }
         }
     }
