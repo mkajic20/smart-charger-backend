@@ -1,5 +1,4 @@
-﻿IUserService
-using SmartCharger.Business.DTOs;
+﻿using SmartCharger.Business.DTOs;
 
 namespace SmartCharger.Business.Interfaces
 {
