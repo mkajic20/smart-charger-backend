@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SmartCharger.Business.DTOs;
 using SmartCharger.Business.Interfaces;
+using SmartCharger.Business.Services;
 
 namespace SmartCharger.Controllers
 {
@@ -14,5 +17,19 @@ namespace SmartCharger.Controllers
         {
             _chargerService = chargerService;
         }
+  
+
+    [Authorize(Policy = "Admin")]
+    [HttpPost("chargers")]
+    public async Task<IActionResult> CreateCharger([FromBody] ChargerDTO chargerDTO)
+    {
+            ChargerResponseDTO response = await _chargerService.CreateNewCharger(chargerDTO);
+            if(response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+    }
     }
 }
