@@ -7,5 +7,8 @@ namespace SmartCharger.Business.DTOs
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<ChargerDTO>? Chargers { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public ChargerDTO? Charger { get; set; }
     }
 }
