@@ -15,33 +15,41 @@ namespace SmartCharger.Business.Services
     {
         public CardService(SmartChargerContext context) : base(context)
         { }
-        public async Task<CardsResponseDTO> GetAllCards()
+        public async Task<CardsResponseDTO> GetAllCards(int page = 1, int pageSize = 20)
         {
             try
             {
+                var totalItems = await _context.Cards.CountAsync();
+
                 var cards = await _context.Cards
-                  .OrderBy(c => c.Id)
-                  .Include(c => c.User)
-                  .Select(c => new CardDTO
-                  {
-                      Id = c.Id,
-                      Value = c.Value,
-                      Active = c.Active,
-                      Name = c.Name,
-                      User = new UserDTO
-                      {
-                          Id = c.User.Id,
-                          FirstName = c.User.FirstName,
-                          LastName = c.User.LastName,
-                          Email = c.User.Email,
-                      }
-                  }).ToListAsync();
+                    .OrderBy(c => c.Id)
+                    .Include(c => c.User)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(c => new CardDTO
+                    {
+                        Id = c.Id,
+                        Value = c.Value,
+                        Active = c.Active,
+                        Name = c.Name,
+                        User = new UserDTO
+                        {
+                            Id = c.User.Id,
+                            FirstName = c.User.FirstName,
+                            LastName = c.User.LastName,
+                            Email = c.User.Email,
+                        }
+                    }).ToListAsync();
+
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
                 return new CardsResponseDTO
                 {
                     Success = true,
                     Message = "List of RFID cards with users",
-                    Cards = cards
+                    Cards = cards,
+                    Page = page,
+                    TotalPages = totalPages
                 };
             }
             catch (Exception ex)
