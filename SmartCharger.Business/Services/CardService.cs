@@ -15,13 +15,25 @@ namespace SmartCharger.Business.Services
     {
         public CardService(SmartChargerContext context) : base(context)
         { }
-        public async Task<CardsResponseDTO> GetAllCards(int page = 1, int pageSize = 20)
+        public async Task<CardsResponseDTO> GetAllCards(int page = 1, int pageSize = 20, string search = null)
         {
             try
             {
-                var totalItems = await _context.Cards.CountAsync();
+                IQueryable<Card> query = _context.Cards;
 
-                var cards = await _context.Cards
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(c =>
+                        c.User.FirstName.Contains(search) ||
+                        c.User.LastName.Contains(search) ||
+                        c.Name.Contains(search) ||
+                        c.Value.Contains(search)
+                    );
+                }
+
+                var totalItems = await query.CountAsync();
+
+                var cards = await query
                     .OrderBy(c => c.Id)
                     .Include(c => c.User)
                     .Skip((page - 1) * pageSize)
