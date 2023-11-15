@@ -56,5 +56,18 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize(Policy = "Admin")]
+        [HttpDelete("cards/{cardId}")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> DeleteCard(int cardId)
+        {
+            CardsResponseDTO response = await _cardService.DeleteCard(cardId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

@@ -149,7 +149,7 @@ namespace SmartCharger.Business.Services
                 return new CardsResponseDTO
                 {
                     Success = true,
-                    Message = "RFID card with id " + cardId + " updated to " + card.Active + ".",
+                    Message = "RFID card with ID:" + cardId + " updated to " + card.Active + ".",
                     Card = MapCardToDTO(card)
                 };
             }
@@ -188,7 +188,7 @@ namespace SmartCharger.Business.Services
                 return new CardsResponseDTO
                 {
                     Success = true,
-                    Message = "RFID card with id " + cardId + " deleted.",
+                    Message = "RFID card with ID:" + cardId + " is deleted.",
                     Card = null
                 };
             }
