@@ -149,7 +149,7 @@ namespace SmartCharger.Business.Services
                 return new CardsResponseDTO
                 {
                     Success = true,
-                    Message = "RFID card active status updated.",
+                    Message = "RFID card with id " + cardId + " updated to " + card.Active + ".",
                     Card = MapCardToDTO(card)
                 };
             }
@@ -166,7 +166,42 @@ namespace SmartCharger.Business.Services
         }
         public async Task<CardsResponseDTO> DeleteCard(int cardId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var card = await _context.Cards
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.Id == cardId);
+
+                if (card == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "There is no RFID card with that ID.",
+                        Card = null
+                    };
+                }
+
+                _context.Cards.Remove(card);
+                await _context.SaveChangesAsync();
+
+                return new CardsResponseDTO
+                {
+                    Success = true,
+                    Message = "RFID card with id " + cardId + " deleted.",
+                    Card = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CardsResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Card = null
+                };
+            }
         }
         private CardDTO MapCardToDTO(Card card)
         {
