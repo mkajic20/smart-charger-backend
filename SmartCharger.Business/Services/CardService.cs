@@ -23,15 +23,29 @@ namespace SmartCharger.Business.Services
 
                 if (!string.IsNullOrEmpty(search))
                 {
+                    string searchLower = search.ToLower();
+
                     query = query.Where(c =>
-                        c.User.FirstName.Contains(search) ||
-                        c.User.LastName.Contains(search) ||
-                        c.Name.Contains(search) ||
-                        c.Value.Contains(search)
+                        c.User.FirstName.ToLower().Contains(search) ||
+                        c.User.LastName.ToLower().Contains(search) ||
+                        c.Name.ToLower().Contains(search) ||
+                        c.Value.ToLower().Contains(search)
                     );
                 }
 
                 var totalItems = await query.CountAsync();
+
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                if (totalItems == 0 || page > totalPages)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "There are no RFID cards with that parameters.",
+                        Cards = null
+                    };
+                }
 
                 var cards = await query
                     .OrderBy(c => c.Id)
@@ -53,12 +67,10 @@ namespace SmartCharger.Business.Services
                         }
                     }).ToListAsync();
 
-                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
                 return new CardsResponseDTO
                 {
                     Success = true,
-                    Message = "List of RFID cards with users",
+                    Message = "List of RFID cards with users.",
                     Cards = cards,
                     Page = page,
                     TotalPages = totalPages
@@ -69,7 +81,8 @@ namespace SmartCharger.Business.Services
                 return new CardsResponseDTO
                 {
                     Success = false,
-                    Message = "An error occurred: " + ex.Message + ".",
+                    Message = "An error occurred.",
+                    Error = ex.Message,
                     Cards = null
                 };
             }
