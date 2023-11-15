@@ -1,0 +1,12 @@
+﻿using SmartCharger.Business.DTOs;
+
+namespace SmartCharger.Business.Interfaces
+{
+    public interface ICardService
+    {
+        Task<CardsResponseDTO> GetAllCards();
+        Task<CardsResponseDTO> GetCardById(int cardId);
+        Task<CardsResponseDTO> UpdateActiveStatus(int cardId);
+        Task<CardsResponseDTO> DeleteCard(int cardId);
+    }
+}

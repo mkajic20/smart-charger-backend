@@ -2,7 +2,7 @@
 
 namespace SmartCharger.Business.DTOs
 {
-    internal class CardsResponseDTO
+    public class CardsResponseDTO
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<CardDTO>? Cards { get; set; }
