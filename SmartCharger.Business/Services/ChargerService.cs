@@ -1,19 +1,20 @@
-﻿using SmartCharger.Business.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartCharger.Business.DTOs;
 using SmartCharger.Business.Interfaces;
 using SmartCharger.Data;
 using SmartCharger.Data.Entities;
+using System.Runtime.InteropServices;
 
 namespace SmartCharger.Business.Services
 {
     public class ChargerService : GenericService<Charger>, IChargerService
     {
         public ChargerService(SmartChargerContext context) : base(context)
-        {
-        }
-
+        {}
         public async Task<ChargerResponseDTO> CreateNewCharger(ChargerDTO charger)
         {
-            if (string.IsNullOrWhiteSpace(charger.Name))
+                     
+            if (ValidateName(charger.Name))
             {
                 return new ChargerResponseDTO
                 {
@@ -23,7 +24,7 @@ namespace SmartCharger.Business.Services
                 };
             }
 
-            if (charger.Latitude < -90 || charger.Latitude > 90)
+            if (ValidateLatitude(charger.Latitude))
             {
                 return new ChargerResponseDTO
                 {
@@ -32,7 +33,7 @@ namespace SmartCharger.Business.Services
                     Error = "Latitude must be between -90 and 90."
                 };
             }
-            if (charger.Longitude < -180 || charger.Longitude > 180)
+            if (ValidateLongitude(charger.Longitude))
             {
                 return new ChargerResponseDTO
                 {
@@ -62,9 +63,46 @@ namespace SmartCharger.Business.Services
             };
         }
 
-        public  async Task<ChargerResponseDTO> DeleteCharger(int chargerId)
+        private bool ValidateLongitude(double longitude)
         {
-            throw new NotImplementedException();
+            return (longitude < -180 || longitude > 180);
+        }
+
+        private bool ValidateLatitude(double latitude)
+        {
+            return (latitude < -90 || latitude > 90);
+        }
+
+        private bool ValidateName(string name)
+        {
+            return string.IsNullOrWhiteSpace(name);
+        }
+
+        public override async Task DeleteAsync(int id)
+        {
+            await base.DeleteAsync(id);
+        }
+        public async Task<ChargerResponseDTO> DeleteCharger(int chargerId)
+        {
+            var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargerId);
+            if (charger == null)
+            {
+                return new ChargerResponseDTO
+                {
+                    Success = false,
+                    Message = "Unsuccessful deletion of the charger.",
+                    Error = $"Charger not found."
+                };
+            }
+           
+
+            await DeleteAsync(chargerId);
+
+            return new ChargerResponseDTO
+            {
+                Success = true,
+                Message = $"Charger deleted successfully."
+            };
         }
 
         public async  Task<ChargerResponseDTO> GetAllChargers()

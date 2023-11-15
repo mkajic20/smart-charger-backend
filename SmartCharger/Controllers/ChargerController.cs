@@ -17,19 +17,32 @@ namespace SmartCharger.Controllers
         {
             _chargerService = chargerService;
         }
-  
 
-    [Authorize(Policy = "Admin")]
-    [HttpPost("chargers")]
-    public async Task<IActionResult> CreateCharger([FromBody] ChargerDTO chargerDTO)
-    {
+
+        [Authorize(Policy = "Admin")]
+        [HttpPost("chargers")]
+        public async Task<IActionResult> CreateCharger([FromBody] ChargerDTO chargerDTO)
+        {
             ChargerResponseDTO response = await _chargerService.CreateNewCharger(chargerDTO);
-            if(response.Success == false)
+            if (response.Success == false)
             {
                 return BadRequest(response);
             }
 
             return Ok(response);
-    }
+        }
+
+        [Authorize(Policy = "Admin")]
+        [HttpDelete("chargers/{chargerId}")]
+        public async Task<IActionResult> DeleteCharger(int chargerId)
+        {
+            ChargerResponseDTO response = await _chargerService.DeleteCharger(chargerId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
