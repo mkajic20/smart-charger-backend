@@ -109,20 +109,7 @@ namespace SmartCharger.Business.Services
                 {
                     Success = true,
                     Message = "RFID card with user.",
-                    Card = new CardDTO
-                    {
-                        Id = card.Id,
-                        Value = card.Value,
-                        Active = card.Active,
-                        Name = card.Name,
-                        User = new UserDTO
-                        {
-                            Id = card.User.Id,
-                            FirstName = card.User.FirstName,
-                            LastName = card.User.LastName,
-                            Email = card.User.Email,
-                        }
-                    }
+                    Card = MapCardToDTO(card)
                 };
             }
             catch (Exception ex)
@@ -136,15 +123,66 @@ namespace SmartCharger.Business.Services
                 };
             }
         }
+        public async Task<CardsResponseDTO> UpdateActiveStatus(int cardId)
+        {
+            try
+            {
+                var card = await _context.Cards.FirstOrDefaultAsync(c => c.Id == cardId);
 
+                if (card == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "There is no RFID card with that ID.",
+                        Card = null
+                    };
+                }
+
+                card.Active = !card.Active;
+
+                _context.Cards.Update(card);
+                await _context.SaveChangesAsync();
+
+                return new CardsResponseDTO
+                {
+                    Success = true,
+                    Message = "RFID card active status updated.",
+                    Card = MapCardToDTO(card)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CardsResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Card = null
+                };
+            }
+        }
         public async Task<CardsResponseDTO> DeleteCard(int cardId)
         {
             throw new NotImplementedException();
         }
-
-        public async Task<CardsResponseDTO> UpdateActiveStatus(int cardId)
+        private CardDTO MapCardToDTO(Card card)
         {
-            throw new NotImplementedException();
+            return new CardDTO
+            {
+                Id = card.Id,
+                Value = card.Value,
+                Active = card.Active,
+                Name = card.Name,
+                User = new UserDTO
+                {
+                    Id = card.User.Id,
+                    FirstName = card.User.FirstName,
+                    LastName = card.User.LastName,
+                    Email = card.User.Email,
+                }
+            };
         }
+
     }
 }
