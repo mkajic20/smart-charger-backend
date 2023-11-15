@@ -43,5 +43,18 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize(Policy = "Admin")]
+        [HttpPatch("cards/{cardId}/active")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> UpdateActiveStatus(int cardId)
+        {
+            CardsResponseDTO response = await _cardService.UpdateActiveStatus(cardId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

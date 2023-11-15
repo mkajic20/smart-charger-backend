@@ -87,13 +87,13 @@ namespace SmartCharger.Business.Services
                 };
             }
         }
-        public async Task<CardsResponseDTO> GetCardById(int id)
+        public async Task<CardsResponseDTO> GetCardById(int cardId)
         {
             try
             {
                 var card = await _context.Cards
                     .Include(c => c.User)
-                    .FirstOrDefaultAsync(c => c.Id == id);
+                    .FirstOrDefaultAsync(c => c.Id == cardId);
 
                 if (card == null)
                 {
@@ -127,7 +127,9 @@ namespace SmartCharger.Business.Services
         {
             try
             {
-                var card = await _context.Cards.FirstOrDefaultAsync(c => c.Id == cardId);
+                var card = await _context.Cards
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.Id == cardId);
 
                 if (card == null)
                 {
