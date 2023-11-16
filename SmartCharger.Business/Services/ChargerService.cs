@@ -3,7 +3,9 @@ using SmartCharger.Business.DTOs;
 using SmartCharger.Business.Interfaces;
 using SmartCharger.Data;
 using SmartCharger.Data.Entities;
+using System;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace SmartCharger.Business.Services
 {
@@ -59,7 +61,7 @@ namespace SmartCharger.Business.Services
 
                 ChargerDTO chargerDTO = MapChargerToDTO(newCharger);
 
-           
+
 
                 return new ChargerResponseDTO
                 {
@@ -91,7 +93,7 @@ namespace SmartCharger.Business.Services
                 CreationTime = charger.CreationTime,
                 LastSync = charger.LastSync,
                 CreatorId = charger.CreatorId
-              
+
             };
         }
 
@@ -150,10 +152,72 @@ namespace SmartCharger.Business.Services
             }
         }
 
-        public async Task<ChargerResponseDTO> GetAllChargers()
+        public async Task<ChargerResponseDTO> GetAllChargers(int page = 1, int pageSize = 20, string search = null)
         {
-            throw new NotImplementedException();
+            try
+            {
+                IQueryable<Charger> query = _context.Chargers;
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    string searchLower = search.ToLower();
+
+                    query = query.Where(c => c.Name.ToLower().Contains(search));
+
+                }
+
+                var totalItems = await query.CountAsync();
+
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                if (totalItems == 0 || page > totalPages)
+                {
+                    return new ChargerResponseDTO
+                    {
+                        Success = false,
+                        Message = "There are no chargers with that parameters.",
+                        Chargers = null
+                    };
+                }
+
+                var chargers = await query
+                    .OrderBy(c => c.Id)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(c => new ChargerDTO
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Latitude = c.Latitude,
+                        Longitude = c.Longitude,
+                        Active = c.Active,
+                        CreationTime = c.CreationTime,
+                        LastSync = c.LastSync,
+                        CreatorId = c.CreatorId
+                    }).ToListAsync();
+
+
+                return new ChargerResponseDTO
+                {
+                    Success = true,
+                    Message = "List of chargers.",
+                    Chargers = chargers,
+                    Page = page,
+                    TotalPages = totalPages
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ChargerResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Chargers = null
+                };
+            }
         }
+
 
         public async Task<ChargerResponseDTO> UpdateCharger(int chargerId, ChargerDTO charger)
         {

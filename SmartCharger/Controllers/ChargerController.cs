@@ -20,6 +20,19 @@ namespace SmartCharger.Controllers
 
 
         [Authorize(Policy = "Admin")]
+        [HttpGet("chargers")]
+        public async Task<ActionResult<IEnumerable<ChargerResponseDTO>>> GetAllChargers([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string search = null)
+        {
+            ChargerResponseDTO response = await _chargerService.GetAllChargers(page, pageSize, search);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [Authorize(Policy = "Admin")]
         [HttpPost("chargers")]
         public async Task<IActionResult> CreateCharger([FromBody] ChargerDTO chargerDTO)
         {

@@ -11,8 +11,14 @@ namespace SmartCharger.Business.DTOs
     {
         public bool Success { get; set; }
         public string Message { get; set; }
-        
+
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Error { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? Page { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? TotalPages { get; set; }
     }
 }
