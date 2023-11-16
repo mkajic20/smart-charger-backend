@@ -44,5 +44,18 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize(Policy = "Admin")]
+        [HttpPut("chargers/{chargerId}")]
+        public async Task<IActionResult> UpdateCharger(int chargerId, [FromBody]ChargerDTO chargerDTO)
+        {
+            ChargerResponseDTO response = await _chargerService.UpdateCharger(chargerId, chargerDTO);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace SmartCharger.Business.Interfaces
     {
         Task<ChargerResponseDTO> CreateNewCharger(ChargerDTO charger);
         Task<ChargerResponseDTO> GetAllChargers();
-        Task<ChargerResponseDTO> UpdateCharger(int chargerId);
+        Task<ChargerResponseDTO> UpdateCharger(int chargerId, ChargerDTO charger);
         Task<ChargerResponseDTO> DeleteCharger(int chargerId);
 
     }
