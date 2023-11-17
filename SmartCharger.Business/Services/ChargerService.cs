@@ -137,7 +137,7 @@ namespace SmartCharger.Business.Services
                 return new ChargerResponseDTO
                 {
                     Success = true,
-                    Message = $"Charger deleted successfully."
+                    Message = "Charger deleted successfully."
 
                 };
             }
