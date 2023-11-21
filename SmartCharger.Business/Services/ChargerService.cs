@@ -112,10 +112,7 @@ namespace SmartCharger.Business.Services
             return string.IsNullOrWhiteSpace(name);
         }
 
-        public override async Task DeleteAsync(int id)
-        {
-            await base.DeleteAsync(id);
-        }
+
         public async Task<ChargerResponseDTO> DeleteCharger(int chargerId)
         {
             try
@@ -127,17 +124,21 @@ namespace SmartCharger.Business.Services
                     {
                         Success = false,
                         Message = "Unsuccessful deletion of the charger.",
-                        Error = "Charger not found."
+                        Error = "Charger not found.",
+                        Charger = null
                     };
                 }
 
 
-                await DeleteAsync(chargerId);
+
+                _context.Chargers.Remove(charger);
+                await _context.SaveChangesAsync();
 
                 return new ChargerResponseDTO
                 {
                     Success = true,
-                    Message = "Charger deleted successfully."
+                    Message = "Charger deleted successfully.",
+                    Charger = null
 
                 };
             }
@@ -147,7 +148,8 @@ namespace SmartCharger.Business.Services
                 {
                     Success = false,
                     Message = "Unsuccessful deletion of the charger.",
-                    Error = ex.Message
+                    Error = ex.Message,
+                    Charger = null
                 };
             }
         }
