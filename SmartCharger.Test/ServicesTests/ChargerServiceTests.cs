@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Moq;
 using SmartCharger.Business.DTOs;
@@ -15,7 +16,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SmartCharger.Test.ServicesTests
 {
-    public  class ChargerServiceTests
+    public class ChargerServiceTests
     {
         [Fact]
         public async Task CreateNewCharger_WithValidData_ShouldReturnSuccessResponse()
@@ -173,11 +174,11 @@ namespace SmartCharger.Test.ServicesTests
                 Assert.True(result.Success);
                 Assert.Equal("List of chargers.", result.Message);
                 Assert.NotNull(result.Chargers);
-                Assert.Equal(2, result.Chargers.Count); 
-                Assert.Equal("Charger 1", result.Chargers[0].Name); 
-                Assert.Equal(1, result.Chargers[0].Id); 
-                Assert.Equal("Charger 2", result.Chargers[1].Name);  
-                Assert.Equal(2, result.Chargers[1].Id);  
+                Assert.Equal(2, result.Chargers.Count);
+                Assert.Equal("Charger 1", result.Chargers[0].Name);
+                Assert.Equal(1, result.Chargers[0].Id);
+                Assert.Equal("Charger 2", result.Chargers[1].Name);
+                Assert.Equal(2, result.Chargers[1].Id);
             }
         }
 
@@ -190,7 +191,7 @@ namespace SmartCharger.Test.ServicesTests
                 .UseInMemoryDatabase(databaseName: "Empty")
                 .Options;
 
-         
+
 
             using (var context = new SmartChargerContext(options))
             {
@@ -237,7 +238,7 @@ namespace SmartCharger.Test.ServicesTests
                     Longitude = 60
                 };
 
-                var updatedResult = await chargerService.UpdateCharger((int)firstCharger.Id,updatedCharger);
+                var updatedResult = await chargerService.UpdateCharger((int)firstCharger.Id, updatedCharger);
 
 
                 // Assert
@@ -374,6 +375,58 @@ namespace SmartCharger.Test.ServicesTests
             }
         }
 
+        [Fact]
+        public async Task DeleteCharger_WhenChargerExists_ShouldReturnSuccess()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "ChargerServiceDatabase5")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupChargerDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var chargerService = new ChargerService(context);
+
+                // Act
+                ChargerResponseDTO result = await chargerService.DeleteCharger(1);
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("Charger deleted successfully.", result.Message);
+                Assert.Null(result.Charger);
+            }
+        }
+
+
+        [Fact]
+        public async Task DeleteCharger_WhenChargerDoesntExist_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "Empty")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var chargerService = new ChargerService(context);
+
+                // Act
+                ChargerResponseDTO result = await chargerService.DeleteCharger(1);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("Unsuccessful deletion of the charger.", result.Message);
+                Assert.Equal("Charger not found.", result.Error);
+                Assert.Null(result.Charger);
+            }
+
+        }
+
         private void SetupChargerDatabase(SmartChargerContext context)
         {
             var chargers = new List<Charger>
@@ -404,5 +457,5 @@ namespace SmartCharger.Test.ServicesTests
             context.SaveChanges();
         }
     }
- }
+}
 
