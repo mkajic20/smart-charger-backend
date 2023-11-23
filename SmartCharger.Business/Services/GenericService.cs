@@ -19,7 +19,7 @@ namespace SmartCharger.Business.Services
             _context = context;
         }
 
-        public async Task DeleteAsync(int id)
+        public virtual async Task DeleteAsync(int id)
         {
             await _context.Set<TEntity>().Where(x => x.Id == id).ExecuteDeleteAsync();
         }

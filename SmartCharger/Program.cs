@@ -60,7 +60,9 @@ builder.Services.AddDbContext<SmartChargerContext>(option => option.UseNpgsql(bu
 builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IChargerService, ChargerService>();
 builder.Services.AddScoped<ICardService, CardService>();
+
 
 var app = builder.Build();
 
