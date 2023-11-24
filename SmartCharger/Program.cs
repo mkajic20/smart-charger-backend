@@ -55,6 +55,13 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Admin", policy => policy.RequireClaim("roleId", "1"));
     options.AddPolicy("Customer", policy => policy.RequireClaim("roleId", "2"));
+    options.AddPolicy("AdminOrCustomer", policy =>
+       policy.RequireAssertion(context =>
+           context.User.HasClaim(c =>
+               (c.Type == "roleId" && (c.Value == "1" || c.Value == "2"))
+           )
+       )
+   );
 });
 builder.Services.AddDbContext<SmartChargerContext>(option => option.UseNpgsql(builder.Configuration.GetConnectionString("connection")));
 builder.Services.AddScoped<IRegisterService, RegisterService>();
@@ -62,6 +69,9 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChargerService, ChargerService>();
 builder.Services.AddScoped<ICardService, CardService>();
+
+
+builder.Services.AddScoped<IEventService, EventService>();
 
 
 var app = builder.Build();
