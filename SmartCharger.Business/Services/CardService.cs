@@ -298,7 +298,100 @@ namespace SmartCharger.Business.Services
 
         public async Task<CardsResponseDTO> AddCard(CardDTO card)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (card.User.Id == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "UserId can't be empty.",
+                        Card = null
+                    };
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == card.User.Id);
+
+                if (user == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "User with ID:" + card.User.Id + " doesn't exist.",
+                        Card = null
+                    };
+                }
+
+                if (card.Value == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card value is required.",
+                        Card = null
+                    };
+                }
+
+                if (card.Name == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card name is required.",
+                        Card = null
+                    };
+                }
+
+                var newCard = new Card
+                {
+                    Value = card.Value,
+                    Active = true,
+                    Name = card.Name,
+                    UserId = user.Id
+                };
+
+                var cardExists = await _context.Cards.AnyAsync(c => c.Value == card.Value);
+                if (cardExists)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card with same value already exists.",
+                        Card = null
+                    };
+                }
+
+                var cardsCount = await _context.Cards.Where(c => c.UserId == user.Id).CountAsync();
+                if (cardsCount >= 5)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "User with ID:" + user.Id + " reached limit of 5 RFID cards.",
+                        Card = null
+                    };
+                }
+
+                await _context.Cards.AddAsync(newCard);
+                await _context.SaveChangesAsync();
+
+                return new CardsResponseDTO
+                {
+                    Success = true,
+                    Message = "Successfully added RFID card.",
+                    Card = MapCardToDTO(newCard)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CardsResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Cards = null
+                };
+            }
         }
 
         public async Task<CardsResponseDTO> DeleteCardForUser(int cardId, int userId)
