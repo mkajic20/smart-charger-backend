@@ -247,7 +247,7 @@ namespace SmartCharger.Business.Services
                     return new CardsResponseDTO
                     {
                         Success = false,
-                        Message = "User with id:" + userId + " doesn't have any RFID card.",
+                        Message = "User with ID:" + userId + " has no RFID card.",
                         Cards = null
                     };
                 }
@@ -256,7 +256,7 @@ namespace SmartCharger.Business.Services
                     return new CardsResponseDTO
                     {
                         Success = true,
-                        Message = "List of RFID cards for user with id:" + userId + ".",
+                        Message = "List of RFID cards for user with ID:" + userId + ".",
                         Cards = cards,
                     };
                 }
