@@ -203,23 +203,6 @@ namespace SmartCharger.Business.Services
                 };
             }
         }
-        private CardDTO MapCardToDTO(Card card)
-        {
-            return new CardDTO
-            {
-                Id = card.Id,
-                Value = card.Value,
-                Active = card.Active,
-                Name = card.Name,
-                User = new UserDTO
-                {
-                    Id = card.User.Id,
-                    FirstName = card.User.FirstName,
-                    LastName = card.User.LastName,
-                    Email = card.User.Email,
-                }
-            };
-        }
 
         public async Task<CardsResponseDTO> GetAllCardsForUser(int userId)
         {
@@ -275,7 +258,42 @@ namespace SmartCharger.Business.Services
 
         public async Task<CardsResponseDTO> GetCardByIdForUser(int cardId, int userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var card = await _context.Cards
+                    .Where(c => c.UserId == userId)
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.Id == cardId);
+
+                if (card == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card with ID:" + cardId + " doesn't exist.",
+                        Card = null
+                    };
+                }
+                else
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = true,
+                        Message = "RFID card.",
+                        Card = MapCardToDTO(card),
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new CardsResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Cards = null
+                };
+            }
         }
 
         public async Task<CardsResponseDTO> AddCard(CardDTO card)
@@ -286,6 +304,24 @@ namespace SmartCharger.Business.Services
         public async Task<CardsResponseDTO> DeleteCardForUser(int cardId, int userId)
         {
             throw new NotImplementedException();
+        }
+
+        private CardDTO MapCardToDTO(Card card)
+        {
+            return new CardDTO
+            {
+                Id = card.Id,
+                Value = card.Value,
+                Active = card.Active,
+                Name = card.Name,
+                User = new UserDTO
+                {
+                    Id = card.User.Id,
+                    FirstName = card.User.FirstName,
+                    LastName = card.User.LastName,
+                    Email = card.User.Email,
+                }
+            };
         }
     }
 }
