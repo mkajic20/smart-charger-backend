@@ -75,7 +75,7 @@ namespace SmartCharger.Controllers
 
         [Authorize]
         [HttpGet("/users/{userId}/cards")]
-        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetAllCards(int userId)
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetAllCardsForUser(int userId)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
             if(userIdClaim != userId.ToString())
