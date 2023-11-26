@@ -128,5 +128,24 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpDelete("/users/{userId}/cards/{cardId}")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> DeleteCardForUser(int cardId, int userId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim != userId.ToString())
+            {
+                return Forbid();
+            }
+
+            CardsResponseDTO response = await _cardService.DeleteCardForUser(cardId, userId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
