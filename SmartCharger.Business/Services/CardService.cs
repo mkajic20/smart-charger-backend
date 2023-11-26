@@ -225,7 +225,7 @@ namespace SmartCharger.Business.Services
                         }
                     }).ToListAsync();
 
-                if (cards == null)
+                if (cards.Count == 0)
                 {
                     return new CardsResponseDTO
                     {
