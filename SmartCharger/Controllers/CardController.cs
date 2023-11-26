@@ -110,5 +110,23 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpPost("/users/{userId}/cards")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> AddCard(int userId, [FromBody] AddCardDTO rfidCard)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim != userId.ToString())
+            {
+                return Forbid();
+            }
+            CardsResponseDTO response = await _cardService.AddCard(rfidCard, userId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

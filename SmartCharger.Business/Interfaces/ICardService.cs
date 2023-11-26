@@ -12,7 +12,7 @@ namespace SmartCharger.Business.Interfaces
         // Customer
         Task<CardsResponseDTO> GetAllCardsForUser(int userId);
         Task<CardsResponseDTO> GetCardByIdForUser(int cardId, int userId);
-        Task<CardsResponseDTO> AddCard(CardDTO card);
+        Task<CardsResponseDTO> AddCard(AddCardDTO card, int userId);
         Task<CardsResponseDTO> DeleteCardForUser(int cardId, int userId);
     }
 }

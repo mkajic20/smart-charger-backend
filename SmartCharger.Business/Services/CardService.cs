@@ -296,28 +296,18 @@ namespace SmartCharger.Business.Services
             }
         }
 
-        public async Task<CardsResponseDTO> AddCard(CardDTO card)
+        public async Task<CardsResponseDTO> AddCard(AddCardDTO card, int userId)
         {
             try
             {
-                if (card.User.Id == null)
-                {
-                    return new CardsResponseDTO
-                    {
-                        Success = false,
-                        Message = "UserId can't be empty.",
-                        Card = null
-                    };
-                }
-
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == card.User.Id);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
                 if (user == null)
                 {
                     return new CardsResponseDTO
                     {
                         Success = false,
-                        Message = "User with ID:" + card.User.Id + " doesn't exist.",
+                        Message = "User with ID:" + userId + " doesn't exist.",
                         Card = null
                     };
                 }
@@ -342,7 +332,7 @@ namespace SmartCharger.Business.Services
                     };
                 }
 
-                var newCard = new Card
+                Card newCard = new Card
                 {
                     Value = card.Value,
                     Active = true,
