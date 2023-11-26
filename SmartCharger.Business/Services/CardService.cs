@@ -221,5 +221,71 @@ namespace SmartCharger.Business.Services
             };
         }
 
+        public async Task<CardsResponseDTO> GetAllCardsForUser(int userId)
+        {
+            try
+            {
+                var cards = await _context.Cards
+                    .Where(c => c.UserId == userId)
+                    .Select(c => new CardDTO
+                    {
+                        Id = c.Id,
+                        Value = c.Value,
+                        Active = c.Active,
+                        Name = c.Name,
+                        User = new UserDTO
+                        {
+                            Id = c.User.Id,
+                            FirstName = c.User.FirstName,
+                            LastName = c.User.LastName,
+                            Email = c.User.Email,
+                        }
+                    }).ToListAsync();
+
+                if (cards == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "User with id:" + userId + " doesn't have any RFID card.",
+                        Cards = null
+                    };
+                }
+                else
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = true,
+                        Message = "List of RFID cards for user with id:" + userId + ".",
+                        Cards = cards,
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new CardsResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Cards = null
+                };
+            }
+        }
+
+        public async Task<CardsResponseDTO> GetCardByIdForUser(int cardId, int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<CardsResponseDTO> AddCard(CardDTO card)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<CardsResponseDTO> DeleteCardForUser(int cardId, int userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
