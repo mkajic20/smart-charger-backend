@@ -386,7 +386,42 @@ namespace SmartCharger.Business.Services
 
         public async Task<CardsResponseDTO> DeleteCardForUser(int cardId, int userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var card = await _context.Cards
+                    .Where(c => c.UserId == userId)
+                    .FirstOrDefaultAsync(c => c.Id == cardId);
+
+                if (card == null)
+                {
+                    return new CardsResponseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card with ID:" + cardId + " doesn't exist.",
+                        Card = null
+                    };
+                }
+
+                _context.Cards.Remove(card);
+                await _context.SaveChangesAsync();
+
+                return new CardsResponseDTO
+                {
+                    Success = true,
+                    Message = "Successfully deleted RFID card with ID:" + cardId + ".",
+                    Card = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CardsResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Cards = null
+                };
+            }
         }
 
         private CardDTO MapCardToDTO(Card card)
