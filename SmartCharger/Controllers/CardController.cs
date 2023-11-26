@@ -91,5 +91,24 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpGet("/users/{userId}/cards/{cardId}")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetCardByIdForUser(int cardId, int userId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim != userId.ToString())
+            {
+                return Forbid();
+            }
+
+            CardsResponseDTO response = await _cardService.GetCardByIdForUser(cardId, userId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
