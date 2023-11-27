@@ -211,6 +211,227 @@ namespace SmartCharger.Test.ServicesTests
             }
         }
 
+        [Fact]
+        public async Task GetAllCardsForUser_WhenCardsExists_ShouldReturnListOfCards()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase5")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.GetAllCardsForUser(1);
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("List of RFID cards for user with ID:1.", result.Message);
+                Assert.NotNull(result.Cards);
+                Assert.Equal("1", result.Cards[0].Id.ToString());
+                Assert.Equal("RFID-ST34-56UV-7890", result.Cards[0].Value);
+                Assert.Equal("Ivo", result.Cards[0].User.FirstName);
+                Assert.Equal("Ivic", result.Cards[0].User.LastName);
+            }
+        }
+
+        [Fact]
+        public async Task GetAllCardsForUser_WhenCardsDontExist_ShouldReturnEmptyListOfCards()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "Empty")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.GetAllCardsForUser(1);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("User with ID:1 has no RFID card.", result.Message);
+                Assert.Null(result.Cards);
+            }
+        }
+
+        [Fact]
+        public async Task GetCardByIdForUser_WhenCardExists_ShouldReturnCard()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase6")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.GetCardByIdForUser(1, 1);
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("RFID-ST34-56UV-7890", result.Card.Value);
+                Assert.Equal(1, result.Card.Id);
+                Assert.Equal(1, result.Card.User.Id);
+                Assert.Equal("Ivo", result.Card.User.FirstName);
+                Assert.Equal("Ivic", result.Card.User.LastName);
+            }
+        }
+
+        [Fact]
+        public async Task GetCardByIdForUser_WhenCardDoesntExist_ShouldReturnEmpty()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "Empty")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.GetCardByIdForUser(1, 1);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("RFID card with ID:1 doesn't exist.", result.Message);
+                Assert.Null(result.Card);
+            }
+        }
+
+        [Fact]
+        public async Task AddCard_WhenCardDoesntExist_ShouldReturnCard()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase7")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+                AddCardDTO card = new AddCardDTO
+                {
+                    Value = "RFID-NF51-42VA-4215",
+                    Name = "Card 3",
+                };
+
+                // Act
+                CardsResponseDTO result = await cardService.AddCard(card, 1);
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("RFID-NF51-42VA-4215", result.Card.Value);
+                Assert.Equal("Card 3", result.Card.Name);
+                Assert.Equal(1, result.Card.User.Id);
+                Assert.Equal("Ivo", result.Card.User.FirstName);
+                Assert.Equal("Ivic", result.Card.User.LastName);
+            }
+        }
+
+        [Fact]
+        public async Task AddCard_WhenCardExists_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase8")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+                AddCardDTO card = new AddCardDTO
+                {
+                    Value = "RFID-ST34-56UV-7890",
+                    Name = "Card 3",
+                };
+
+                // Act
+                CardsResponseDTO result = await cardService.AddCard(card, 1);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("RFID card with same value already exists.", result.Message);
+                Assert.Null(result.Card);
+            }
+        }
+
+        [Fact]
+        public async Task DeleteCardForUser_WhenCardExists_ShouldReturnSuccess()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase9")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.DeleteCardForUser(1, 1);
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("Successfully deleted RFID card with ID:1.", result.Message);
+                Assert.Null(result.Card);
+            }
+        }
+
+        [Fact]
+        public async Task DeleteCardForUser_WhenCardDoesntExist_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "empty")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.DeleteCardForUser(1, 1);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("RFID card with ID:1 doesn't exist.", result.Message);
+                Assert.Null(result.Card);
+            }
+        }
+
         private void SetupDatabase(SmartChargerContext context)
         {
             string salt = BCrypt.Net.BCrypt.GenerateSalt();

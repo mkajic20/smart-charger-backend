@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using SmartCharger.Business.DTOs;
 using SmartCharger.Business.Interfaces;
 using SmartCharger.Business.Services;
+using System.Security.Claims;
 
 namespace SmartCharger.Controllers
 {
-    [Route("api/admin")]
+    [Route("api/")]
     [ApiController]
     public class CardController : ControllerBase
     {
@@ -19,7 +22,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpGet("cards")]
+        [HttpGet("admin/cards")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetAllCards([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string search = null)
         {
             CardsResponseDTO response = await _cardService.GetAllCards(page, pageSize, search);
@@ -32,7 +35,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpGet("cards/{cardId}")]
+        [HttpGet("admin/cards/{cardId}")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetCardById(int cardId)
         {
             CardsResponseDTO response = await _cardService.GetCardById(cardId);
@@ -45,7 +48,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpPatch("cards/{cardId}/active")]
+        [HttpPatch("admin/cards/{cardId}/active")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> UpdateActiveStatus(int cardId)
         {
             CardsResponseDTO response = await _cardService.UpdateActiveStatus(cardId);
@@ -58,10 +61,85 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpDelete("cards/{cardId}")]
+        [HttpDelete("admin/cards/{cardId}")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> DeleteCard(int cardId)
         {
             CardsResponseDTO response = await _cardService.DeleteCard(cardId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("/users/{userId}/cards")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetAllCardsForUser(int userId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if(userIdClaim != userId.ToString())
+            {
+                return Forbid();
+            }
+
+            CardsResponseDTO response = await _cardService.GetAllCardsForUser(userId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("/users/{userId}/cards/{cardId}")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetCardByIdForUser(int cardId, int userId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim != userId.ToString())
+            {
+                return Forbid();
+            }
+
+            CardsResponseDTO response = await _cardService.GetCardByIdForUser(cardId, userId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("/users/{userId}/cards")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> AddCard(int userId, [FromBody] AddCardDTO rfidCard)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim != userId.ToString())
+            {
+                return Forbid();
+            }
+            CardsResponseDTO response = await _cardService.AddCard(rfidCard, userId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpDelete("/users/{userId}/cards/{cardId}")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> DeleteCardForUser(int cardId, int userId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim != userId.ToString())
+            {
+                return Forbid();
+            }
+
+            CardsResponseDTO response = await _cardService.DeleteCardForUser(cardId, userId);
             if (response.Success == false)
             {
                 return BadRequest(response);
