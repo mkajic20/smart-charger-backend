@@ -34,9 +34,7 @@ namespace SmartCharger.Business.Services
                     string searchLower = search.ToLower();
 
                     query = query.Where(e => e.Card.Name.ToLower().Contains(searchLower)
-                                           || e.Charger.Name.ToLower().Contains(searchLower)
-                                           || e.User.FirstName.ToLower().Contains(searchLower)
-                                           || e.User.LastName.ToLower().Contains(searchLower));
+                                           || e.Charger.Name.ToLower().Contains(searchLower));
                 }
 
                 var totalItems = await query.CountAsync();
