@@ -26,7 +26,7 @@ namespace SmartCharger.Business.Services
                         Error = "User not found."
                     };
                 }
-                IQueryable<Event> query = _context.Events.Where(e => e.UserId == userId);
+                IQueryable<Event> query = _context.Events.Where(e => e.UserId == userId && e.EndTime != null);
 
 
                 if (!string.IsNullOrEmpty(search))
