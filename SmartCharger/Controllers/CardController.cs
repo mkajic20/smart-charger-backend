@@ -74,7 +74,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize]
-        [HttpGet("/users/{userId}/cards")]
+        [HttpGet("users/{userId}/cards")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetAllCardsForUser(int userId)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
@@ -93,7 +93,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize]
-        [HttpGet("/users/{userId}/cards/{cardId}")]
+        [HttpGet("users/{userId}/cards/{cardId}")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> GetCardByIdForUser(int cardId, int userId)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
@@ -112,7 +112,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize]
-        [HttpPost("/users/{userId}/cards")]
+        [HttpPost("users/{userId}/cards")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> AddCard(int userId, [FromBody] AddCardDTO rfidCard)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
@@ -130,7 +130,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize]
-        [HttpDelete("/users/{userId}/cards/{cardId}")]
+        [HttpDelete("users/{userId}/cards/{cardId}")]
         public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> DeleteCardForUser(int cardId, int userId)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
@@ -148,10 +148,10 @@ namespace SmartCharger.Controllers
             return Ok(response);
         }
 
-        [HttpGet("/cards/{cardValue}/verify")]
-        public async Task<ActionResult<ResponseBaseDTO>> VerifyCard(string cardValue)
+        [HttpGet("cards/{cardValue}/verify")]
+        public async Task<ActionResult<IEnumerable<CardsResponseDTO>>> VerifyCard(string cardValue)
         {
-            ResponseBaseDTO response = await _cardService.VerifyCard(cardValue);
+            CardsResponseDTO response = await _cardService.VerifyCard(cardValue);
 
             if (response.Success == false)
             {
