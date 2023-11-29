@@ -424,9 +424,55 @@ namespace SmartCharger.Business.Services
             }
         }
 
-        public async Task<ResponseBaseDTO> VerifyCard(int cardId)
+        public async Task<ResponseBaseDTO> VerifyCard(string cardValue)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var card = await _context.Cards.FirstOrDefaultAsync(c => c.Value == cardValue);
+
+                if (card == null)
+                {
+                    return new ResponseBaseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card with that value doesn't exist.",
+                    };
+                }
+
+                if (card.Active == false)
+                {
+                    return new ResponseBaseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card with name " + card.Name + " is not active.",
+                    };
+                }
+
+                if (card.UsageStatus == true)
+                {
+                    return new ResponseBaseDTO
+                    {
+                        Success = false,
+                        Message = "RFID card with name " + card.Name + " is already in use.",
+                    };
+                }
+
+                return new ResponseBaseDTO
+                {
+                    Success = true,
+                    Message = "RFID card with name " + card.Name + " is accepted.",
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CardsResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message,
+                    Cards = null
+                };
+            }
         }
 
         private CardDTO MapCardToDTO(Card card)
