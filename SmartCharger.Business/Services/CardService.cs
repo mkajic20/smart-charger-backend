@@ -424,6 +424,11 @@ namespace SmartCharger.Business.Services
             }
         }
 
+        public async Task<ResponseBaseDTO> VerifyCard(int cardId)
+        {
+            throw new NotImplementedException();
+        }
+
         private CardDTO MapCardToDTO(Card card)
         {
             return new CardDTO
