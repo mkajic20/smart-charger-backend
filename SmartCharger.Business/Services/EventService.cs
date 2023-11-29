@@ -104,5 +104,15 @@ namespace SmartCharger.Business.Services
                 };
             }
         }
+
+        public async Task<EventResponseDTO> StartCharging(DateTime startTime, int chargerId, int cardId, int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<EventResponseDTO> EndCharging(DateTime endTime, double value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
