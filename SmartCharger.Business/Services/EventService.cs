@@ -107,7 +107,117 @@ namespace SmartCharger.Business.Services
 
         public async Task<EventResponseDTO> StartCharging(DateTime startTime, int chargerId, int cardId, int userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargerId);
+                if (charger == null)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "Charger with ID: " + charger.Id + " not found."
+                    };
+                }
+                if (charger.Active == true)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "Charger is already in use."
+                    };
+                }
+                var card = await _context.Cards.SingleOrDefaultAsync(c => c.Id == cardId);
+                if (card == null)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "Card with ID: " + card.Id + " not found."
+                    };
+                }
+                if (card.Active == false)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "RFID Card is not active."
+                    };
+                }
+                if (card.UsageStatus == true)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "RFID Card is already in use."
+                    };
+                }
+                var user = await _context.Users.SingleOrDefaultAsync(c => c.Id == userId);
+                if (user.Active == false)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "User is not active."
+                    };
+                }
+
+                var newEvent = new Event
+                {
+                    StartTime = startTime,
+                    ChargerId = chargerId,
+                    CardId = cardId,
+                    UserId = userId
+                };
+
+                _context.Events.Add(newEvent);
+                charger.Active = true;
+                card.UsageStatus = true;
+
+                await _context.SaveChangesAsync();
+
+                return new EventResponseDTO
+                {
+                    Success = true,
+                    Message = "Charging started.",
+                    Event = new EventDTO
+                    {
+                        Id = newEvent.Id,
+                        StartTime = newEvent.StartTime,
+                        EndTime = newEvent.EndTime,
+                        Volume = newEvent.Volume,
+                        Card = new CardDTO
+                        {
+                            Name = card.Name,
+                            Value = card.Value,
+                            Active = card.Active
+                        },
+                        Charger = new ChargerDTO
+                        {
+                            Id = charger.Id,
+                            Name = charger.Name,
+                            Latitude = charger.Latitude,
+                            Longitude = charger.Longitude,
+                            CreationTime = charger.CreationTime,
+                            Active = charger.Active,
+                        },
+                        User = new UserDTO
+                        {
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Email = user.Email
+                        }
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new EventResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message
+                };
+            }
         }
 
         public async Task<EventResponseDTO> EndCharging(DateTime endTime, double value)
