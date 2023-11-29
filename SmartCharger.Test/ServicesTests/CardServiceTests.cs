@@ -450,11 +450,12 @@ namespace SmartCharger.Test.ServicesTests
                 CardService cardService = new CardService(context);
 
                 // Act
-                ResponseBaseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
+                CardsResponseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
 
                 // Assert
                 Assert.True(result.Success);
-                Assert.Equal("RFID card with name Card 1 is accepted.", result.Message);
+                Assert.Equal("RFID card is accepted.", result.Message);
+                Assert.Equal("RFID-ST34-56UV-7890", result.Card.Value);
             }
         }
 
@@ -478,7 +479,7 @@ namespace SmartCharger.Test.ServicesTests
                 CardService cardService = new CardService(context);
 
                 // Act
-                ResponseBaseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
+                CardsResponseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
 
                 // Assert
                 Assert.False(result.Success);
@@ -506,7 +507,7 @@ namespace SmartCharger.Test.ServicesTests
                 CardService cardService = new CardService(context);
 
                 // Act
-                ResponseBaseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
+                CardsResponseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
 
                 // Assert
                 Assert.False(result.Success);

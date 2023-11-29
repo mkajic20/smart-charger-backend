@@ -566,10 +566,24 @@ namespace SmartCharger.Test.ControllerTests
             // Arrange
             var cardServiceMock = new Mock<ICardService>();
             cardServiceMock.Setup(service => service.VerifyCard(It.IsAny<string>()))
-                .ReturnsAsync(new ResponseBaseDTO
+                .ReturnsAsync(new CardsResponseDTO
                 {
                     Success = true,
-                    Message = "RFID card with name Card 1 is accepted."
+                    Message = "RFID card is accepted.",
+                    Card = new CardDTO
+                    {
+                        Id = 1,
+                        Name = "Card 1",
+                        Value = "RFID-ST34-56UV-7890",
+                        Active = true,
+                        User = new UserDTO
+                        {
+                            Id = 1,
+                            FirstName = "Ivo",
+                            LastName = "Ivic",
+                            Email = ""
+                        }
+                    }
                 });
 
             var controller = new CardController(cardServiceMock.Object);
@@ -583,7 +597,7 @@ namespace SmartCharger.Test.ControllerTests
             Assert.Equal(200, result.StatusCode);
             var response = result.Value as ResponseBaseDTO;
             Assert.True(response.Success);
-            Assert.Equal("RFID card with name Card 1 is accepted.", response.Message);
+            Assert.Equal("RFID card is accepted.", response.Message);
         }
 
         [Fact]
@@ -592,7 +606,7 @@ namespace SmartCharger.Test.ControllerTests
             // Arrange
             var cardServiceMock = new Mock<ICardService>();
             cardServiceMock.Setup(service => service.VerifyCard(It.IsAny<string>()))
-                .ReturnsAsync(new ResponseBaseDTO
+                .ReturnsAsync(new CardsResponseDTO
                 {
                     Success = false,
                     Message = "RFID card with name Card 1 is not active."
