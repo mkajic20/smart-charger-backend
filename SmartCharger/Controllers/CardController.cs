@@ -147,5 +147,18 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("/cards/{cardValue}/verify")]
+        public async Task<ActionResult<ResponseBaseDTO>> VerifyCard(string cardValue)
+        {
+            ResponseBaseDTO response = await _cardService.VerifyCard(cardValue);
+
+            if (response.Success == false)
+            {
+                return new ObjectResult(response) { StatusCode = 403 };
+            }
+
+            return Ok(response);
+        }
     }
 }
