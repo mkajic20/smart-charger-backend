@@ -228,9 +228,85 @@ namespace SmartCharger.Business.Services
             }
         }
 
-        public async Task<EventResponseDTO> EndCharging(DateTime endTime, double value)
+        public async Task<EventResponseDTO> EndCharging(int eventId, DateTime endTime, double value)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var chargingEvent = await _context.Events.SingleOrDefaultAsync(e => e.Id == eventId);
+
+                if (chargingEvent == null)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "Event with ID: " + eventId + " not found."
+                    };
+                }
+
+                if (chargingEvent.EndTime != null)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "Charging has already ended."
+                    };
+                }
+
+                chargingEvent.EndTime = endTime;
+                chargingEvent.Volume = value;
+
+                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargingEvent.ChargerId);
+                var card = await _context.Cards.SingleOrDefaultAsync(c => c.Id == chargingEvent.CardId);
+
+                charger.Active = false;
+                card.UsageStatus = false;
+
+                await _context.SaveChangesAsync();
+
+                return new EventResponseDTO
+                {
+                    Success = true,
+                    Message = "Charging has ended.",
+                    Event = new EventDTO
+                    {
+                        Id = chargingEvent.Id,
+                        StartTime = chargingEvent.StartTime,
+                        EndTime = chargingEvent.EndTime,
+                        Volume = chargingEvent.Volume,
+                        Card = new CardDTO
+                        {
+                            Name = chargingEvent.Card.Name,
+                            Value = chargingEvent.Card.Value,
+                            Active = chargingEvent.Card.Active
+                        },
+                        Charger = new ChargerDTO
+                        {
+                            Id = chargingEvent.Charger.Id,
+                            Name = chargingEvent.Charger.Name,
+                            Latitude = chargingEvent.Charger.Latitude,
+                            Longitude = chargingEvent.Charger.Longitude,
+                            CreationTime = chargingEvent.Charger.CreationTime,
+                            Active = chargingEvent.Charger.Active,
+                            CreatorId = chargingEvent.Charger.CreatorId
+                        },
+                        User = new UserDTO
+                        {
+                            FirstName = chargingEvent.User.FirstName,
+                            LastName = chargingEvent.User.LastName,
+                            Email = chargingEvent.User.Email
+                        }
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new EventResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred.",
+                    Error = ex.Message
+                };
+            }
         }
     }
 }
