@@ -7,6 +7,7 @@ namespace SmartCharger.Data.Entities
         public string Value { get; set; }
         public bool Active { get; set; }
         public string Name { get; set; }
+        public bool UsageStatus { get; set; }
 
         [ForeignKey(nameof(User))]
         public int UserId { get; set; }
