@@ -115,7 +115,7 @@ namespace SmartCharger.Business.Services
                     return new EventResponseDTO
                     {
                         Success = false,
-                        Message = "Charger with ID: " + charger.Id + " not found."
+                        Message = "Charger with ID: " + chargerId + " not found."
                     };
                 }
                 if (charger.Active == true)
@@ -132,7 +132,7 @@ namespace SmartCharger.Business.Services
                     return new EventResponseDTO
                     {
                         Success = false,
-                        Message = "Card with ID: " + card.Id + " not found."
+                        Message = "Card with ID: " + cardId + " not found."
                     };
                 }
                 if (card.Active == false)
@@ -152,6 +152,14 @@ namespace SmartCharger.Business.Services
                     };
                 }
                 var user = await _context.Users.SingleOrDefaultAsync(c => c.Id == userId);
+                if (user == null)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "User with ID: " + userId + " not found."
+                    };
+                }
                 if (user.Active == false)
                 {
                     return new EventResponseDTO
@@ -161,7 +169,7 @@ namespace SmartCharger.Business.Services
                     };
                 }
 
-                var newEvent = new Event
+                Event newEvent = new Event
                 {
                     StartTime = startTime,
                     ChargerId = chargerId,
