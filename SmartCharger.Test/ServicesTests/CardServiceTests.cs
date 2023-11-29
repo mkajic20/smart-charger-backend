@@ -432,6 +432,110 @@ namespace SmartCharger.Test.ServicesTests
             }
         }
 
+        [Fact]
+        public async Task VerifyCard_WhenCardExistsAndReadyToUse_ShouldReturnSuccess()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase10")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                CardService cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("RFID card is accepted.", result.Message);
+                Assert.Equal("RFID-ST34-56UV-7890", result.Card.Value);
+            }
+        }
+
+        [Fact]
+        public async Task VerifyCard_WhenCardExistsAndIsNotActive_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase11")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+                context.Cards.FirstOrDefault().Active = false;
+                context.SaveChanges();
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                CardService cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("RFID card with name Card 1 is not active.", result.Message);
+            }
+        }
+
+        [Fact]
+        public async Task VerifyCard_WhenCardExistsAndIsInUse_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "CardServiceDatabase12")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+                context.Cards.FirstOrDefault().UsageStatus = true;
+                context.SaveChanges();
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                CardService cardService = new CardService(context);
+
+                // Act
+                CardsResponseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("RFID card with name Card 1 is already in use.", result.Message);
+            }
+        }
+
+        [Fact]
+        public async Task VerifyCard_WhenCardDoesntExist_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "empty")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                CardService cardService = new CardService(context);
+
+                // Act
+                ResponseBaseDTO result = await cardService.VerifyCard("RFID-ST34-56UV-7890");
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("RFID card with that value doesn't exist.", result.Message);
+            }
+        }
+
         private void SetupDatabase(SmartChargerContext context)
         {
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
