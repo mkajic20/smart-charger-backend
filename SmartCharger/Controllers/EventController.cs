@@ -7,7 +7,7 @@ using SmartCharger.Business.Services;
 
 namespace SmartCharger.Controllers
 {
-    [Route("api/users/")]
+    [Route("api/")]
     [ApiController]
     public class EventController : ControllerBase
     {
@@ -20,10 +20,34 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "AdminOrCustomer")]
-        [HttpGet("{userId}/history")]
+        [HttpGet("users/{userId}/history")]
         public async Task<ActionResult<IEnumerable<EventResponseDTO>>> GetUsersChargingHistory(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string search = null)
         {
             EventResponseDTO response = await _eventService.GetUsersChargingHistory(userId, page, pageSize, search);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("events/start")]
+        public async Task<ActionResult<IEnumerable<EventResponseDTO>>> StartCharging([FromBody] EventChargingDTO eventDTO)
+        {
+            EventResponseDTO response = await _eventService.StartCharging(eventDTO);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPatch("events/stop")]
+        public async Task<ActionResult<IEnumerable<EventResponseDTO>>> EndCharging([FromBody] EventChargingDTO eventDTO)
+        {
+            EventResponseDTO response = await _eventService.EndCharging(eventDTO);
             if (response.Success == false)
             {
                 return BadRequest(response);
