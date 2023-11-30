@@ -208,6 +208,7 @@ namespace SmartCharger.Business.Services
                 var chargingEvent = await _context.Events
                     .Include(e => e.Charger)
                     .Include(e => e.Card)
+                    .Include(e => e.User)
                     .SingleOrDefaultAsync(e => e.Id == eventDTO.Id);
 
                 if (chargingEvent == null)
@@ -257,9 +258,9 @@ namespace SmartCharger.Business.Services
                         StartTime = selectedEvent.StartTime,
                         EndTime = selectedEvent.EndTime,
                         Volume = selectedEvent.Volume,
-                        ChargerId = selectedEvent.ChargerId,
-                        CardId = selectedEvent.CardId,
-                        UserId = selectedEvent.UserId
+                        ChargerId = selectedEvent.Charger.Id,
+                        CardId = selectedEvent.Card.Id,
+                        UserId = selectedEvent.User.Id
                     }
                 };
             }
