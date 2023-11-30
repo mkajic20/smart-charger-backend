@@ -148,5 +148,162 @@ namespace SmartCharger.Test.ControllerTests
             Assert.Equal("There are no events with that parameters.", response.Message);
             Assert.Null(response.Events);
         }
+
+        [Fact]
+        public async Task StartCharging_WhenEventServiceReturnsSuccess_ShouldReturnOk()
+        {
+            //Arrange
+            var eventServiceMock = new Mock<IEventService>();
+            eventServiceMock.Setup(service => service.StartCharging(It.IsAny<EventChargingDTO>())).ReturnsAsync(
+                new EventResponseDTO
+                {
+                    Success = true,
+                    Message = "Charging started.",
+                    Event = new EventChargingDTO
+                    {
+                        Id = 1,
+                        StartTime = DateTime.Now.ToUniversalTime(),
+                        ChargerId = 1,
+                        CardId = 1,
+                        UserId = 1
+                    }
+                });
+
+            var controller = new EventController(eventServiceMock.Object);
+
+            //Act
+            var actionResult = await controller.StartCharging(new EventChargingDTO
+            {
+                StartTime = DateTime.Now.ToUniversalTime(),
+                ChargerId = 1,
+                CardId = 1,
+                UserId = 1
+            });
+
+            //Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.Equal(200, result.StatusCode);
+            var response = result.Value as EventResponseDTO;
+            Assert.NotNull(response);
+            Assert.True(response.Success);
+            Assert.Equal("Charging started.", response.Message);
+            Assert.Equal(response.Event.Id, 1);
+        }
+
+        [Fact]
+        public async Task StartCharging_WhenEventServiceReturnsFailure_ShouldReturnBadRequest()
+        {
+            //Arrange
+            var eventServiceMock = new Mock<IEventService>();
+            eventServiceMock.Setup(service => service.StartCharging(It.IsAny<EventChargingDTO>())).ReturnsAsync(
+                new EventResponseDTO
+                {
+                    Success = false,
+                    Message = "Charger is already in use.",
+                    Event = null
+                });
+
+            var controller = new EventController(eventServiceMock.Object);
+
+            //Act
+            var actionResult = await controller.StartCharging(new EventChargingDTO
+            {
+                StartTime = DateTime.Now.ToUniversalTime(),
+                ChargerId = 1,
+                CardId = 1,
+                UserId = 1
+            });
+
+            //Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.Equal(400, result.StatusCode);
+            var response = result.Value as EventResponseDTO;
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Equal("Charger is already in use.", response.Message);
+            Assert.Null(response.Event);
+        }
+
+        [Fact]
+        public async Task EndCharging_WhenEventServiceReturnsSuccess_ShouldReturnOk()
+        {
+            //Arrange
+            var eventServiceMock = new Mock<IEventService>();
+            eventServiceMock.Setup(service => service.EndCharging(It.IsAny<EventChargingDTO>())).ReturnsAsync(
+                new EventResponseDTO
+                {
+                    Success = true,
+                    Message = "Charging has ended.",
+                    Event = new EventChargingDTO
+                    {
+                        Id = 1,
+                        StartTime = DateTime.Now.ToUniversalTime(),
+                        EndTime = DateTime.Now.ToUniversalTime(),
+                        ChargerId = 1,
+                        CardId = 1,
+                        UserId = 1
+                    }
+                });
+
+            var controller = new EventController(eventServiceMock.Object);
+
+            //Act
+            var actionResult = await controller.EndCharging(new EventChargingDTO
+            {
+                StartTime = DateTime.Now.ToUniversalTime(),
+                EndTime = DateTime.Now.ToUniversalTime(),
+                ChargerId = 1,
+                CardId = 1,
+                UserId = 1
+            });
+
+            //Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.Equal(200, result.StatusCode);
+            var response = result.Value as EventResponseDTO;
+            Assert.NotNull(response);
+            Assert.True(response.Success);
+            Assert.Equal("Charging has ended.", response.Message);
+            Assert.Equal(response.Event.Id, 1);
+        }
+
+        [Fact]
+        public async Task EndCharging_WhenEventServiceReturnsFailure_ShouldReturnBadRequest()
+        {
+            //Arrange
+            var eventServiceMock = new Mock<IEventService>();
+            eventServiceMock.Setup(service => service.EndCharging(It.IsAny<EventChargingDTO>())).ReturnsAsync(
+                new EventResponseDTO
+                {
+                    Success = false,
+                    Message = "Charging has already ended.",
+                    Event = null
+                });
+
+            var controller = new EventController(eventServiceMock.Object);
+
+            //Act
+            var actionResult = await controller.EndCharging(new EventChargingDTO
+            {
+                StartTime = DateTime.Now.ToUniversalTime(),
+                EndTime = DateTime.Now.ToUniversalTime(),
+                ChargerId = 1,
+                CardId = 1,
+                UserId = 1
+            });
+
+            //Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.Equal(400, result.StatusCode);
+            var response = result.Value as EventResponseDTO;
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Equal("Charging has already ended.", response.Message);
+            Assert.Null(response.Event);
+        }
     }
 }
