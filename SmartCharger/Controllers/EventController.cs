@@ -35,7 +35,19 @@ namespace SmartCharger.Controllers
         [HttpPost("events/start")]
         public async Task<ActionResult<IEnumerable<EventResponseDTO>>> StartCharging([FromBody] EventChargingDTO eventDTO)
         {
-            EventResponseDTO response = await _eventService.StartCharging(eventDTO.StartTime, eventDTO.ChargerId, eventDTO.CardId, eventDTO.UserId);
+            EventResponseDTO response = await _eventService.StartCharging(eventDTO);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPatch("events/stop")]
+        public async Task<ActionResult<IEnumerable<EventResponseDTO>>> EndCharging([FromBody] EventChargingDTO eventDTO)
+        {
+            EventResponseDTO response = await _eventService.EndCharging(eventDTO);
             if (response.Success == false)
             {
                 return BadRequest(response);

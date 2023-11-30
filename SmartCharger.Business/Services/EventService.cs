@@ -105,17 +105,17 @@ namespace SmartCharger.Business.Services
             }
         }
 
-        public async Task<EventResponseDTO> StartCharging(DateTime startTime, int chargerId, int cardId, int userId)
+        public async Task<EventResponseDTO> StartCharging(EventChargingDTO eventDTO)
         {
             try
             {
-                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargerId);
+                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == eventDTO.ChargerId);
                 if (charger == null)
                 {
                     return new EventResponseDTO
                     {
                         Success = false,
-                        Message = "Charger with ID: " + chargerId + " not found."
+                        Message = "Charger with ID: " + eventDTO.ChargerId + " not found."
                     };
                 }
                 if (charger.Active == true)
@@ -126,13 +126,15 @@ namespace SmartCharger.Business.Services
                         Message = "Charger is already in use."
                     };
                 }
-                var card = await _context.Cards.SingleOrDefaultAsync(c => c.Id == cardId);
+                var card = await _context.Cards
+                    .Include(c => c.User)
+                    .SingleOrDefaultAsync(c => c.Id == eventDTO.CardId);
                 if (card == null)
                 {
                     return new EventResponseDTO
                     {
                         Success = false,
-                        Message = "Card with ID: " + cardId + " not found."
+                        Message = "Card with ID: " + eventDTO.CardId + " not found."
                     };
                 }
                 if (card.Active == false)
@@ -140,7 +142,7 @@ namespace SmartCharger.Business.Services
                     return new EventResponseDTO
                     {
                         Success = false,
-                        Message = "RFID Card is not active."
+                        Message = "RFID card is not active."
                     };
                 }
                 if (card.UsageStatus == true)
@@ -148,19 +150,10 @@ namespace SmartCharger.Business.Services
                     return new EventResponseDTO
                     {
                         Success = false,
-                        Message = "RFID Card is already in use."
+                        Message = "RFID card is already in use."
                     };
                 }
-                var user = await _context.Users.SingleOrDefaultAsync(c => c.Id == userId);
-                if (user == null)
-                {
-                    return new EventResponseDTO
-                    {
-                        Success = false,
-                        Message = "User with ID: " + userId + " not found."
-                    };
-                }
-                if (user.Active == false)
+                if (card.User.Active == false)
                 {
                     return new EventResponseDTO
                     {
@@ -171,10 +164,10 @@ namespace SmartCharger.Business.Services
 
                 Event newEvent = new Event
                 {
-                    StartTime = startTime,
-                    ChargerId = chargerId,
-                    CardId = cardId,
-                    UserId = userId
+                    StartTime = eventDTO.StartTime,
+                    ChargerId = eventDTO.ChargerId,
+                    CardId = eventDTO.CardId,
+                    UserId = eventDTO.UserId
                 };
 
                 _context.Events.Add(newEvent);
@@ -187,33 +180,13 @@ namespace SmartCharger.Business.Services
                 {
                     Success = true,
                     Message = "Charging started.",
-                    Event = new EventDTO
+                    Event = new EventChargingDTO
                     {
                         Id = newEvent.Id,
                         StartTime = newEvent.StartTime,
-                        EndTime = newEvent.EndTime,
-                        Volume = newEvent.Volume,
-                        Card = new CardDTO
-                        {
-                            Name = card.Name,
-                            Value = card.Value,
-                            Active = card.Active
-                        },
-                        Charger = new ChargerDTO
-                        {
-                            Id = charger.Id,
-                            Name = charger.Name,
-                            Latitude = charger.Latitude,
-                            Longitude = charger.Longitude,
-                            CreationTime = charger.CreationTime,
-                            Active = charger.Active,
-                        },
-                        User = new UserDTO
-                        {
-                            FirstName = user.FirstName,
-                            LastName = user.LastName,
-                            Email = user.Email
-                        }
+                        ChargerId = newEvent.ChargerId,
+                        CardId = newEvent.CardId,
+                        UserId = newEvent.UserId
                     }
                 };
             }
@@ -228,18 +201,21 @@ namespace SmartCharger.Business.Services
             }
         }
 
-        public async Task<EventResponseDTO> EndCharging(int eventId, DateTime endTime, double value)
+        public async Task<EventResponseDTO> EndCharging(EventChargingDTO eventDTO)
         {
             try
             {
-                var chargingEvent = await _context.Events.SingleOrDefaultAsync(e => e.Id == eventId);
+                var chargingEvent = await _context.Events
+                    .Include(e => e.Charger)
+                    .Include(e => e.Card)
+                    .SingleOrDefaultAsync(e => e.Id == eventDTO.Id);
 
                 if (chargingEvent == null)
                 {
                     return new EventResponseDTO
                     {
                         Success = false,
-                        Message = "Event with ID: " + eventId + " not found."
+                        Message = "Event with ID: " + eventDTO.Id + " not found."
                     };
                 }
 
@@ -252,14 +228,22 @@ namespace SmartCharger.Business.Services
                     };
                 }
 
-                chargingEvent.EndTime = endTime;
-                chargingEvent.Volume = value;
+                chargingEvent.EndTime = eventDTO.EndTime;
+                chargingEvent.Volume = eventDTO.Volume;
 
-                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargingEvent.ChargerId);
-                var card = await _context.Cards.SingleOrDefaultAsync(c => c.Id == chargingEvent.CardId);
+                chargingEvent.Charger.Active = false;
+                chargingEvent.Card.UsageStatus = false;
 
-                charger.Active = false;
-                card.UsageStatus = false;
+                Event selectedEvent = new Event
+                {
+                    Id = chargingEvent.Id,
+                    StartTime = chargingEvent.StartTime,
+                    EndTime = chargingEvent.EndTime,
+                    Volume = chargingEvent.Volume,
+                    Charger = chargingEvent.Charger,
+                    Card = chargingEvent.Card,
+                    User = chargingEvent.User
+                };
 
                 await _context.SaveChangesAsync();
 
@@ -267,34 +251,15 @@ namespace SmartCharger.Business.Services
                 {
                     Success = true,
                     Message = "Charging has ended.",
-                    Event = new EventDTO
+                    Event = new EventChargingDTO
                     {
-                        Id = chargingEvent.Id,
-                        StartTime = chargingEvent.StartTime,
-                        EndTime = chargingEvent.EndTime,
-                        Volume = chargingEvent.Volume,
-                        Card = new CardDTO
-                        {
-                            Name = chargingEvent.Card.Name,
-                            Value = chargingEvent.Card.Value,
-                            Active = chargingEvent.Card.Active
-                        },
-                        Charger = new ChargerDTO
-                        {
-                            Id = chargingEvent.Charger.Id,
-                            Name = chargingEvent.Charger.Name,
-                            Latitude = chargingEvent.Charger.Latitude,
-                            Longitude = chargingEvent.Charger.Longitude,
-                            CreationTime = chargingEvent.Charger.CreationTime,
-                            Active = chargingEvent.Charger.Active,
-                            CreatorId = chargingEvent.Charger.CreatorId
-                        },
-                        User = new UserDTO
-                        {
-                            FirstName = chargingEvent.User.FirstName,
-                            LastName = chargingEvent.User.LastName,
-                            Email = chargingEvent.User.Email
-                        }
+                        Id = selectedEvent.Id,
+                        StartTime = selectedEvent.StartTime,
+                        EndTime = selectedEvent.EndTime,
+                        Volume = selectedEvent.Volume,
+                        ChargerId = selectedEvent.ChargerId,
+                        CardId = selectedEvent.CardId,
+                        UserId = selectedEvent.UserId
                     }
                 };
             }
