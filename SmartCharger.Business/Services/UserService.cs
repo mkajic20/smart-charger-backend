@@ -12,7 +12,7 @@ namespace SmartCharger.Business.Services
         public UserService(SmartChargerContext context) : base(context)
         {
         }
-        public async Task<UsersResponseDTO> GetAllUsers()
+        public async Task<UsersResponseDTO> GetAllUsers(int page, int pageSize)
         {
             try
             {
