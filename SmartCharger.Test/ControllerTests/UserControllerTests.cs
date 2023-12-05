@@ -14,7 +14,7 @@ namespace SmartCharger.Test.ControllerTests
         {
             // Arrange
             var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(service => service.GetAllUsers())
+            userServiceMock.Setup(service => service.GetAllUsers(It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(new UsersResponseDTO
                 {
                     Success = true,
