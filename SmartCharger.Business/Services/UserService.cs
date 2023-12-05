@@ -12,11 +12,36 @@ namespace SmartCharger.Business.Services
         public UserService(SmartChargerContext context) : base(context)
         {
         }
-        public async Task<UsersResponseDTO> GetAllUsers(int page = 1, int pageSize= 20)
+        public async Task<UsersResponseDTO> GetAllUsers(int page = 1, int pageSize = 20, string search = null)
         {
             try
             {
-                var users = await _context.Users
+                IQueryable<User> query = _context.Users;
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    string searchLower = search.ToLower();
+                    query = query.Where(u=>
+                        u.FirstName.ToLower().Contains(search) ||
+                        u.LastName.ToLower().Contains(search) ||
+                        u.Email.ToLower().Contains(search));
+                }
+
+                var totalItems = await query.CountAsync();
+
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                if (totalItems == 0 || page > totalPages)
+                {
+                    return new UsersResponseDTO
+                    {
+                        Success = false,
+                        Message = "There are no users with that parameters.",
+                        Users = null,
+                    };
+                }
+
+                var users = await query
                   .OrderBy(u => u.Id)
                   .Skip((page - 1) * pageSize)
                   .Take(pageSize)
@@ -36,6 +61,7 @@ namespace SmartCharger.Business.Services
                     Message = "List of users.",
                     Users = users,
                     Page = page,
+                    TotalPages = totalPages
 
                 };
             }
