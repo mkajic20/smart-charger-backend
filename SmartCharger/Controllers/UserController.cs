@@ -24,10 +24,6 @@ namespace SmartCharger.Controllers
         {
 
             UsersResponseDTO response = await _userService.GetAllUsers(page, pageSize, search);
-            if (response.Users == null)
-            {
-                return NoContent();
-            }
             if (response.Success == false)
             {
                 return BadRequest(response);
