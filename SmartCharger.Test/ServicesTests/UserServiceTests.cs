@@ -44,6 +44,30 @@ namespace SmartCharger.Test.ServicesTests
             }
 
         }
+        [Fact]
+        public async Task GetAllUsers_WhenUsersDontExist_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "Empty")
+                .Options;
+
+
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var userService = new UserService(context);
+
+                // Act
+                UsersResponseDTO result = await userService.GetAllUsers();
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("There are no users with that parameters.", result.Message);
+                Assert.Null(result.Users);
+
+            }
+        }
 
         private void Dispose(SmartChargerContext context)
         {
