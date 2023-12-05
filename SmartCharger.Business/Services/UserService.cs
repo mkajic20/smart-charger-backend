@@ -12,12 +12,14 @@ namespace SmartCharger.Business.Services
         public UserService(SmartChargerContext context) : base(context)
         {
         }
-        public async Task<UsersResponseDTO> GetAllUsers()
+        public async Task<UsersResponseDTO> GetAllUsers(int page = 1, int pageSize= 20)
         {
             try
             {
                 var users = await _context.Users
                   .OrderBy(u => u.Id)
+                  .Skip((page - 1) * pageSize)
+                  .Take(pageSize)
                   .Select(u => new UserDTO
                   {
                       Id = u.Id,
@@ -32,7 +34,9 @@ namespace SmartCharger.Business.Services
                 {
                     Success = true,
                     Message = "List of users.",
-                    Users = users
+                    Users = users,
+                    Page = page,
+
                 };
             }
             catch (Exception ex)
