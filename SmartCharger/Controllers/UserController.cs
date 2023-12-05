@@ -20,14 +20,10 @@ namespace SmartCharger.Controllers
 
         [Authorize(Policy = "Admin")]
         [HttpGet("users")]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string search = null)
         {
 
-            UsersResponseDTO response = await _userService.GetAllUsers(page, pageSize);
-            if (response.Users == null)
-            {
-                return NoContent();
-            }
+            UsersResponseDTO response = await _userService.GetAllUsers(page, pageSize, search);
             if (response.Success == false)
             {
                 return BadRequest(response);

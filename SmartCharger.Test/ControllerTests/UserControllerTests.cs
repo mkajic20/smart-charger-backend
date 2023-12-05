@@ -14,7 +14,7 @@ namespace SmartCharger.Test.ControllerTests
         {
             // Arrange
             var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(service => service.GetAllUsers(It.IsAny<int>(), It.IsAny<int>()))
+            userServiceMock.Setup(service => service.GetAllUsers(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .ReturnsAsync(new UsersResponseDTO
                 {
                     Success = true,
@@ -45,7 +45,34 @@ namespace SmartCharger.Test.ControllerTests
             Assert.Equal(200, result.StatusCode);
         }
 
+        [Fact]
+        public async Task GetAllUsers_WhenUserServiceReturnsNoUsers_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var userServiceMock = new Mock<IUserService>();
+            userServiceMock.Setup(service => service.GetAllUsers(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(new UsersResponseDTO
+                {
+                    Success = false,
+                    Message = "There are no users with that parameters.",
+                    Users = null
+                });
 
+            var controller = new UserController(userServiceMock.Object);
+
+            // Act
+            var actionResult = await controller.GetAllUsers();
+
+            // Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.Equal(400, result.StatusCode);
+            var response = result.Value as UsersResponseDTO;
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Equal("There are no users with that parameters.", response.Message);
+            Assert.Null(response.Users);
+        }
 
         [Fact]
         public async Task GetUserById_WhenUserServiceReturnsUser_ShouldReturnOk()
