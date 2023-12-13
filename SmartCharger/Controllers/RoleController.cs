@@ -17,5 +17,18 @@ namespace SmartCharger.Controllers
         {
             _roleService = roleService;
         }
+
+        [Authorize(Policy = "Admin")]
+        [HttpGet("admin/roles")]
+        public async Task<ActionResult<IEnumerable<RoleResponseDTO>>> GetAllRoles()
+        {
+            RoleResponseDTO response = await _roleService.GetAllRoles();
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

@@ -70,6 +70,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChargerService, ChargerService>();
 builder.Services.AddScoped<ICardService, CardService>();
 
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddScoped<IEventService, EventService>();
 
