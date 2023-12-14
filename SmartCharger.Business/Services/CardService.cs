@@ -26,10 +26,10 @@ namespace SmartCharger.Business.Services
                     string searchLower = search.ToLower();
 
                     query = query.Where(c =>
-                        c.User.FirstName.ToLower().Contains(search) ||
-                        c.User.LastName.ToLower().Contains(search) ||
-                        c.Name.ToLower().Contains(search) ||
-                        c.Value.ToLower().Contains(search)
+                        c.User.FirstName.ToLower().Contains(searchLower) ||
+                        c.User.LastName.ToLower().Contains(searchLower) ||
+                        c.Name.ToLower().Contains(searchLower) ||
+                        c.Value.ToLower().Contains(searchLower)
                     );
                 }
 

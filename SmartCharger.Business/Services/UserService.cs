@@ -22,9 +22,9 @@ namespace SmartCharger.Business.Services
                 {
                     string searchLower = search.ToLower();
                     query = query.Where(u=>
-                        u.FirstName.ToLower().Contains(search) ||
-                        u.LastName.ToLower().Contains(search) ||
-                        u.Email.ToLower().Contains(search));
+                        u.FirstName.ToLower().Contains(searchLower) ||
+                        u.LastName.ToLower().Contains(searchLower) ||
+                        u.Email.ToLower().Contains(searchLower));
                 }
 
                 var totalItems = await query.CountAsync();
