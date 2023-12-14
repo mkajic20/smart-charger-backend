@@ -33,8 +33,8 @@ namespace SmartCharger.Business.Services
                 {
                     string searchLower = search.ToLower();
 
-                    query = query.Where(e => e.Card.Name.ToLower().Contains(searchLower)
-                                           || e.Charger.Name.ToLower().Contains(searchLower));
+                    query = query.Where(e => e.Card.Name.ToLower().Contains(search)
+                                           || e.Charger.Name.ToLower().Contains(search));
                 }
 
                 var totalItems = await query.CountAsync();
@@ -91,7 +91,10 @@ namespace SmartCharger.Business.Services
                 {
                     Success = true,
                     Message = $"List of {user.FirstName} {user.LastName}'s events.",
-                    Events = events
+                    Events = events,
+                    Page = page,
+                    TotalPages = totalPages
+
                 };
             }
             catch (Exception ex)
