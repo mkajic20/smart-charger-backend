@@ -164,7 +164,7 @@ namespace SmartCharger.Business.Services
                 {
                     string searchLower = search.ToLower();
 
-                    query = query.Where(c => c.Name.ToLower().Contains(search));
+                    query = query.Where(c => c.Name.ToLower().Contains(searchLower));
 
                 }
 
