@@ -7,7 +7,7 @@ using SmartCharger.Business.Services;
 
 namespace SmartCharger.Controllers
 {
-    [Route("api/admin/")]
+    [Route("api/")]
     [ApiController]
     public class ChargerController : ControllerBase
     {
@@ -19,7 +19,7 @@ namespace SmartCharger.Controllers
         }
 
 
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "AdminOrCustomer")]
         [HttpGet("chargers")]
         public async Task<ActionResult<IEnumerable<ChargerResponseDTO>>> GetAllChargers([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string search = null)
         {
@@ -33,7 +33,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpPost("chargers")]
+        [HttpPost("admin/chargers")]
         public async Task<IActionResult> CreateCharger([FromBody] ChargerDTO chargerDTO)
         {
             ChargerResponseDTO response = await _chargerService.CreateNewCharger(chargerDTO);
@@ -46,7 +46,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpDelete("chargers/{chargerId}")]
+        [HttpDelete("admin/chargers/{chargerId}")]
         public async Task<IActionResult> DeleteCharger(int chargerId)
         {
             ChargerResponseDTO response = await _chargerService.DeleteCharger(chargerId);
@@ -59,7 +59,7 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpPut("chargers/{chargerId}")]
+        [HttpPut("admin/chargers/{chargerId}")]
         public async Task<IActionResult> UpdateCharger(int chargerId, [FromBody]ChargerDTO chargerDTO)
         {
             ChargerResponseDTO response = await _chargerService.UpdateCharger(chargerId, chargerDTO);

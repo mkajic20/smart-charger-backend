@@ -48,7 +48,7 @@ namespace SmartCharger.Test.ServicesTests
                 Assert.Equal(chargerDTO.Name, result.Charger.Name);
                 Assert.Equal(chargerDTO.Latitude, result.Charger.Latitude);
                 Assert.Equal(chargerDTO.Longitude, result.Charger.Longitude);
-                Assert.True(result.Charger.Active);
+                Assert.False(result.Charger.Active);
                 Assert.NotNull(result.Charger.CreationTime);
                 Assert.Null(result.Error);
             }

@@ -91,7 +91,10 @@ namespace SmartCharger.Business.Services
                 {
                     Success = true,
                     Message = $"List of {user.FirstName} {user.LastName}'s events.",
-                    Events = events
+                    Events = events,
+                    Page = page,
+                    TotalPages = totalPages
+
                 };
             }
             catch (Exception ex)
