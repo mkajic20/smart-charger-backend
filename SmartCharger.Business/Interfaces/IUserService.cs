@@ -6,7 +6,7 @@ namespace SmartCharger.Business.Interfaces
     {
         Task<UsersResponseDTO> GetAllUsers(int page, int pageSize, string search);
         Task<SingleUserResponseDTO> GetUserById(int userId);
-        Task<SingleUserResponseDTO> UpdateRole(int userId);
+        Task<SingleUserResponseDTO> UpdateRole(int userId, int roleId);
         Task<SingleUserResponseDTO> UpdateActiveStatus(int userId);
     }
 }

@@ -21,7 +21,7 @@ namespace SmartCharger.Business.Services
                 if (!string.IsNullOrEmpty(search))
                 {
                     string searchLower = search.ToLower();
-                    query = query.Where(u=>
+                    query = query.Where(u =>
                         u.FirstName.ToLower().Contains(searchLower) ||
                         u.LastName.ToLower().Contains(searchLower) ||
                         u.Email.ToLower().Contains(searchLower));
@@ -166,7 +166,7 @@ namespace SmartCharger.Business.Services
             };
         }
 
-        public async Task<SingleUserResponseDTO> UpdateRole(int userId)
+        public async Task<SingleUserResponseDTO> UpdateRole(int userId, int roleId)
         {
             try
             {
@@ -182,7 +182,19 @@ namespace SmartCharger.Business.Services
                     };
                 }
 
-                userEntity.RoleId = (userEntity.RoleId == 1) ? 2 : 1;
+                if (userEntity.RoleId == roleId)
+                {
+                    return new SingleUserResponseDTO
+                    {
+                        Success = false,
+                        Message = $"User {userEntity.FirstName} {userEntity.LastName}'s role is already set to that role. No changes made.",
+                        User = MakeUserDTO(userEntity)
+                    };
+                }
+
+
+
+                userEntity.RoleId = roleId;
 
                 await _context.SaveChangesAsync();
 
