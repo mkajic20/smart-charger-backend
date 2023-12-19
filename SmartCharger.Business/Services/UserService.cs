@@ -186,7 +186,7 @@ namespace SmartCharger.Business.Services
                 {
                     return new SingleUserResponseDTO
                     {
-                        Success = true,
+                        Success = false,
                         Message = $"User {userEntity.FirstName} {userEntity.LastName}'s role is already set to that role. No changes made.",
                         User = MakeUserDTO(userEntity)
                     };
