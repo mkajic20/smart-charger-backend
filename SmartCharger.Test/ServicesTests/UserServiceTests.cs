@@ -212,12 +212,13 @@ namespace SmartCharger.Test.ServicesTests
             }
 
             var userId = 1;
+            var roleId = 1;
             using (var context = new SmartChargerContext(options))
             {
                 var userService = new UserService(context);
 
                 // Act
-                SingleUserResponseDTO result = await userService.UpdateRole(userId);
+                SingleUserResponseDTO result = await userService.UpdateRole(userId, roleId);
 
                 // Assert
                 Assert.True(result.Success);
@@ -245,12 +246,13 @@ namespace SmartCharger.Test.ServicesTests
             }
 
             var nonExistingUserId = 1000;
+            var roleId = 2;
             using (var context = new SmartChargerContext(options))
             {
                 var userService = new UserService(context);
 
                 // Act
-                SingleUserResponseDTO result = await userService.UpdateRole(nonExistingUserId);
+                SingleUserResponseDTO result = await userService.UpdateRole(nonExistingUserId, roleId);
 
                 // Assert
                 Assert.False(result.Success);
@@ -259,6 +261,42 @@ namespace SmartCharger.Test.ServicesTests
                 Dispose(context);
             }
         }
+
+        [Fact]
+        public async Task UpdateRole_WhenUserRoleIsAlreadySet_ShouldReturnNoChangesMade()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "UserServiceDatabaseRole")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            var userId = 1;
+            var roleId = 2;
+            using (var context = new SmartChargerContext(options))
+            {
+                var userService = new UserService(context);
+
+                // Act
+                SingleUserResponseDTO result = await userService.UpdateRole(userId, roleId);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.NotNull(result.User);
+                Assert.Equal(userId, result.User.Id);
+                Assert.Equal("Ivo", result.User.FirstName);
+                Assert.Equal("Ivic", result.User.LastName);
+                Assert.Equal(2, result.User.RoleId);
+                Assert.Equal($"User {result.User.FirstName} {result.User.LastName}'s role is already set to that role. No changes made.", result.Message);
+                Dispose(context);
+            }
+        }
+
+
 
 
 
