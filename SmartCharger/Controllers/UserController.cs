@@ -67,15 +67,20 @@ namespace SmartCharger.Controllers
         }
 
         [Authorize(Policy = "Admin")]
-        [HttpPatch("users/{userId}/role")]
-        public async Task<ActionResult<UserDTO>> UpdateRole(int userId)
+        [HttpPatch("users/{userId}/role/{roleId}")]
+        public async Task<ActionResult<UserDTO>> UpdateRole(int userId, int roleId)
         {
-            SingleUserResponseDTO response = await _userService.UpdateRole(userId);
-            if (response.Success == false)
+            SingleUserResponseDTO response = await _userService.UpdateRole(userId, roleId);
+
+            if (!response.Success)
             {
                 if (response.Message == "User not found.")
                 {
                     return NotFound(response);
+                }
+                else if (response.Message.Contains("role is already set"))
+                {
+                    return StatusCode(StatusCodes.Status409Conflict, response);
                 }
                 else
                 {
@@ -85,6 +90,7 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
 
     }
 

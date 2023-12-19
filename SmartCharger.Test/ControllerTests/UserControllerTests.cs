@@ -113,7 +113,7 @@ namespace SmartCharger.Test.ControllerTests
         public async Task GetUserById_WhenUserNotFound_ShouldReturnError()
         {
             // Arrange
-            var userId = 1; 
+            var userId = 1;
             var userServiceMock = new Mock<IUserService>();
             userServiceMock.Setup(service => service.GetUserById(userId))
                 .ReturnsAsync(new SingleUserResponseDTO
@@ -213,8 +213,9 @@ namespace SmartCharger.Test.ControllerTests
         {
             // Arrange
             var userId = 1;
+            var roleId = 2;
             var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(service => service.UpdateRole(userId))
+            userServiceMock.Setup(service => service.UpdateRole(userId, roleId))
                 .ReturnsAsync(new SingleUserResponseDTO
                 {
                     Success = true,
@@ -233,7 +234,7 @@ namespace SmartCharger.Test.ControllerTests
             var controller = new UserController(userServiceMock.Object);
 
             // Act
-            var actionResult = await controller.UpdateRole(userId);
+            var actionResult = await controller.UpdateRole(userId, roleId);
 
             // Assert
             Assert.NotNull(actionResult);
@@ -247,8 +248,9 @@ namespace SmartCharger.Test.ControllerTests
         {
             // Arrange
             var userId = 1;
+            var roleId = 2;
             var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(service => service.UpdateRole(userId))
+            userServiceMock.Setup(service => service.UpdateRole(userId, roleId))
                 .ReturnsAsync(new SingleUserResponseDTO
                 {
                     Success = false,
@@ -259,7 +261,7 @@ namespace SmartCharger.Test.ControllerTests
             var controller = new UserController(userServiceMock.Object);
 
             // Act
-            var actionResult = await controller.UpdateRole(userId);
+            var actionResult = await controller.UpdateRole(userId, roleId);
 
             // Assert
             Assert.NotNull(actionResult);
@@ -274,6 +276,46 @@ namespace SmartCharger.Test.ControllerTests
             Assert.Equal("User not found.", response.Message);
         }
 
+        [Fact]
+        public async Task UpdateRole_WhenUserHasTheSameRoleHeUpdates_ShouldReturnConflict()
+        {
+            // Arrange
+            var userId = 1;
+            var roleId = 2;
+            var userServiceMock = new Mock<IUserService>();
+            userServiceMock.Setup(service => service.UpdateRole(userId, roleId))
+                .ReturnsAsync(new SingleUserResponseDTO
+                {
+                    Success = false,
+                    Message = "User Ivo Ivic's role is already set to that role. No changes made.",
+                    User = new UserDTO
+                    {
+                        Id = userId,
+                        FirstName = "Ivo",
+                        LastName = "Ivic",
+                        Email = "iivic@example.com",
+                        Active = true,
+                        RoleId = 2
+                    }
+                });
+
+            var controller = new UserController(userServiceMock.Object);
+
+            // Act
+            var actionResult = await controller.UpdateRole(userId, roleId);
+
+            // Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(409, result.StatusCode);
+
+            var response = result.Value as SingleUserResponseDTO;
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.NotNull(response.User);
+            Assert.Equal("User Ivo Ivic's role is already set to that role. No changes made.", response.Message);
+        }
     }
 }
 
