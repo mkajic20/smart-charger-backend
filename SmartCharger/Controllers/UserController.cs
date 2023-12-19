@@ -80,7 +80,7 @@ namespace SmartCharger.Controllers
                 }
                 else if (response.Message.Contains("role is already set"))
                 {
-                    return StatusCode(StatusCodes.Status422UnprocessableEntity, response);
+                    return StatusCode(StatusCodes.Status409Conflict, response);
                 }
                 else
                 {
