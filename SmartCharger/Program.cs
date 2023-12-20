@@ -85,6 +85,7 @@ builder.Services.AddScoped<IChargerService, ChargerService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
 
 
