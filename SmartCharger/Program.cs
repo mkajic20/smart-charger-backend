@@ -58,8 +58,8 @@ builder.Services.AddAuthentication(options =>
     };
 }).AddGoogle(options =>
 {
-    options.ClientId = "223586710221-k3kiu6l12qfq5krgdd2v7j96kj63bm26.apps.googleusercontent.com";
-    options.ClientSecret = "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";
+    options.ClientId = "223586710221-3808p3ltsqf0e42ge6jun8mibsa2dt3k.apps.googleusercontent.com";
+    options.ClientSecret = "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";
 });
 
 
@@ -83,10 +83,10 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChargerService, ChargerService>();
 builder.Services.AddScoped<ICardService, CardService>();
-
 builder.Services.AddScoped<IRoleService, RoleService>();
-
 builder.Services.AddScoped<IEventService, EventService>();
+
+
 
 
 var app = builder.Build();
