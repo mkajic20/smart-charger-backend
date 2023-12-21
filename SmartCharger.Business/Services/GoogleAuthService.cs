@@ -1,28 +1,63 @@
-﻿using Google.Apis.Auth.OAuth2;
+﻿using Google;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Oauth2.v2;
 using Google.Apis.Services;
 using SmartCharger.Business.DTOs;
 using SmartCharger.Business.Interfaces;
 
 
-public class GoogleAuthService : IGoogleAuthService { 
-    public async Task<GoogleUserDTO> GetUserInfoAsync(string accessToken)
+public class GoogleAuthService : IGoogleAuthService {
+
+    public async Task<LoginResponseDTO> GetUserInfoAsync(string accessToken)
     {
-        var credential = GoogleCredential.FromAccessToken(accessToken);
-        var service = new Oauth2Service(new BaseClientService.Initializer
+        try
         {
-            HttpClientInitializer = credential,
-            ApplicationName = "Smart Charger",
-        });
+            var credential = GoogleCredential.FromAccessToken(accessToken);
+            var service = new Oauth2Service(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "Smart Charger",
+            });
 
-        var userInfo = await service.Userinfo.Get().ExecuteAsync();
+            var userInfo = await service.Userinfo.Get().ExecuteAsync();
 
-        return new GoogleUserDTO
+            if (userInfo == null)
+            {
+                return new LoginResponseDTO
+                {
+                    Success = false,
+                    Message = "Invalid access token."
+                };
+            }
+
+            return new LoginResponseDTO
+            {
+                Success = true,
+                User = new UserDTO
+                {
+                    Email = userInfo.Email,
+                    FirstName = userInfo.Name,
+                    LastName = userInfo.FamilyName,
+                }
+            };
+        }
+        catch (GoogleApiException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            Email = userInfo.Email,
-            Name = userInfo.Name,
-            LastName = userInfo.FamilyName,
-
-        };
+            return new LoginResponseDTO
+            {
+                Success = false,
+                Message = "Invalid access token."
+            };
+        }
+        catch (Exception ex)
+        {
+            return new LoginResponseDTO
+            {
+                Success = false,
+                Message = "An error occurred: " + ex.Message
+            };
+        }
     }
+
 }
+
