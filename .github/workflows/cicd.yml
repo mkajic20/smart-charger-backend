@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - 'develop'
+      - 'main'
+  pull_request:
+    branches:
+      - 'develop'
+      - 'main'   
+
+  
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up NuGet
+        uses: NuGet/setup-nuget@v1.2.0
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.3.1
+      
+      - name: Navigate to Workspace
+        run: cd $GITHUB_WORKSPACE
+
+      - name: List Directories
+        run: dir
+
+      - name: Replace secret placeholder in appsettings.json
+        run: |
+          sed -i "s/#{CONNECTION_STRING}/${{secrets.CONNECTION_STRING}}/g" SmartCharger/appsettings.json
+  
+      - name: Restore NuGet packages for backend
+        run: nuget restore SmartCharger.sln
+
+      - name: Restore NuGet packages for unit tests
+        run: nuget restore SmartCharger.Test/SmartCharger.Test.csproj
+
+      - name: Build Backend
+        run: msbuild SmartCharger.sln /p:platform="Any CPU" /p:configuration=Release
+
+      - name: Run Unit Tests
+        run: dotnet test SmartCharger.Test/SmartCharger.Test.csproj --configuration Release
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build docker image
+        run: docker build -f SmartCharger/Dockerfile -t ${{secrets.REPO_NAME}} .
+
+      - name: Tag docker image
+        run: docker tag ${{secrets.REPO_NAME}}:latest ${{ secrets.DOCKER_USERNAME }}/${{secrets.REPO_NAME}}:latest
+
+      - name: Push docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{secrets.REPO_NAME}}:latest
+ 
