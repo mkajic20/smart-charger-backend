@@ -30,10 +30,6 @@ jobs:
 
       - name: List Directories
         run: dir
-
-      - name: Replace secret placeholder in appsettings.json
-        run: |
-          sed -i "s/#{CONNECTION_STRING}/${{secrets.CONNECTION_STRING}}/g" SmartCharger/appsettings.json
   
       - name: Restore NuGet packages for backend
         run: nuget restore SmartCharger.sln
