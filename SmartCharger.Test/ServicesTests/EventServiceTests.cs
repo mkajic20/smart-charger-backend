@@ -347,6 +347,61 @@ namespace SmartCharger.Test.ServicesTests
             }
         }
 
+
+        [Fact]
+        public async Task GetFullChargingHistory_WhenEventsExist_ShouldReturnListOfEvents()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "EventServiceDatabaseGetFullHistory")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var eventService = new EventService(context);
+
+                // Act
+                EventResponseDTO result = await eventService.GetFullChargingHistory();
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("List of all events.", result.Message);
+                Assert.NotNull(result.Events);
+                Assert.Equal(1, result.Events.Count);
+            }
+        }
+        [Fact]
+        public async Task GetFullChargingHistory_WhenSearchParameterIsInvalid_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "EventServiceDatabaseGetFullHistorySearch")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var eventService = new EventService(context);
+
+                // Act
+                EventResponseDTO result = await eventService.GetFullChargingHistory(1, 5, "Mrkic");
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("There are no events with that parameters.", result.Message);
+                Assert.Null(result.Events);
+            }
+        }
+
         private void SetupDatabase(SmartChargerContext context)
         {
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
