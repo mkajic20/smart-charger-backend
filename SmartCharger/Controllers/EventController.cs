@@ -69,5 +69,18 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize(Policy = "Admin")]
+        [HttpGet("admin/statistics")]
+        public async Task<IActionResult> GetPastChargings([FromQuery] int year, [FromQuery] int month, [FromQuery] int chargerId)
+        {
+            EventResponseDTO response = await _eventService.GetStatistics(year, month, chargerId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
