@@ -55,5 +55,19 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+
+        [Authorize(Policy = "Admin")]
+        [HttpGet("admin/history")]
+        public async Task<ActionResult<IEnumerable<EventResponseDTO>>> GetFullUsersChargingHistory([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string search = null)
+        {
+            EventResponseDTO response = await _eventService.GetFullChargingHistory(page, pageSize, search);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
