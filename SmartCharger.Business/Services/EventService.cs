@@ -366,5 +366,63 @@ namespace SmartCharger.Business.Services
                 };
             }
         }
+
+        public async Task<EventResponseDTO> GetStatistics(int year, int month, int chargerId)
+        {
+
+                try
+                {
+                    var chargerExists = await _context.Chargers.AnyAsync(c => c.Id == chargerId);
+                    if (!chargerExists)
+                    {
+                        return new EventResponseDTO
+                        {
+                            Success = false,
+                            Message = $"Charger with ID {chargerId} doesn't exist.",
+                            Events = null
+                        };
+                    }
+
+                    DateTime startDate = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
+                    DateTime endDate = startDate.AddMonths(1).AddDays(-1);
+
+                    var pastChargings = await _context.Events
+                        .Where(e => e.EndTime.HasValue && e.EndTime.Value.ToUniversalTime() >= startDate && e.EndTime.Value.ToUniversalTime() <= endDate && e.ChargerId == chargerId)
+                        .Select(e => new EventDTO
+                        {
+                            Id = e.Id,
+                            StartTime = DateTime.SpecifyKind(e.StartTime, DateTimeKind.Utc),
+                            EndTime = DateTime.SpecifyKind(e.EndTime.Value, DateTimeKind.Utc),
+                            Volume = e.Volume
+                        })
+                        .ToListAsync();
+
+                    if (pastChargings.Count == 0)
+                    {
+                        return new EventResponseDTO
+                        {
+                            Success = false,
+                            Message = $"No past chargings found for charger ID {chargerId} in {startDate:MMMM yyyy}.",
+                            Events = null
+                        };
+                    }
+
+                    return new EventResponseDTO
+                    {
+                        Success = true,
+                        Message = $"List of past chargings for charger ID {chargerId} in {startDate:MMMM yyyy}.",
+                        Events = pastChargings,
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = $"An error occurred: {ex.Message}.",
+                        Events = null
+                    };
+                }
+            }
+        }
     }
-}
