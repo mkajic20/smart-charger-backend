@@ -278,7 +278,7 @@ namespace SmartCharger.Business.Services
             }
         }
 
-        public async Task<EventResponseDTO> GetFullChargingHistory(int page, int pageSize, string search)
+        public async Task<EventResponseDTO> GetFullChargingHistory(int page = 1, int pageSize = 20, string search = null)
         {
             try
             {
