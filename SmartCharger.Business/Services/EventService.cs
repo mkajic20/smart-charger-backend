@@ -277,5 +277,94 @@ namespace SmartCharger.Business.Services
                 };
             }
         }
+
+        public async Task<EventResponseDTO> GetFullChargingHistory(int page, int pageSize, string search)
+        {
+            try
+            {
+
+                IQueryable<Event> query = _context.Events.Where(e => e.EndTime != null);
+
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    string searchLower = search.ToLower();
+
+                    query = query.Where(e => e.Card.Name.ToLower().Contains(searchLower)
+                                        || e.Charger.Name.ToLower().Contains(searchLower)
+                                        || e.User.FirstName.ToLower().Contains(searchLower)
+                                        || e.User.LastName.ToLower().Contains(searchLower));
+                }
+
+                var totalItems = await query.CountAsync();
+
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                if (totalItems == 0 || page > totalPages)
+                {
+                    return new EventResponseDTO
+                    {
+                        Success = false,
+                        Message = "There are no events with that parameters.",
+                        Events = null
+                    };
+                }
+
+
+                var events = await query
+                  .OrderBy(e => e.Id)
+                  .Skip((page - 1) * pageSize)
+                  .Take(pageSize)
+                  .Select(e => new EventDTO
+                  {
+                      Id = e.Id,
+                      StartTime = e.StartTime,
+                      EndTime = e.EndTime,
+                      Volume = e.Volume,
+                      Card = new CardDTO
+                      {
+                          Name = e.Card.Name,
+                          Value = e.Card.Value,
+                          Active = e.Card.Active,
+                          User = null,
+                      },
+                      Charger = new ChargerDTO
+                      {
+                          Id = e.Charger.Id,
+                          Name = e.Charger.Name,
+                          Latitude = e.Charger.Latitude,
+                          Longitude = e.Charger.Longitude,
+                          CreationTime = e.Charger.CreationTime,
+                          Active = e.Charger.Active,
+                          CreatorId = e.Charger.CreatorId
+                      },
+                      User = new UserDTO
+                      {
+                          FirstName = e.User.FirstName,
+                          LastName = e.User.LastName,
+                          Email = e.User.Email
+                      }
+                  }).ToListAsync();
+
+                return new EventResponseDTO
+                {
+                    Success = true,
+                    Message = $"List of all events.",
+                    Events = events,
+                    Page = page,
+                    TotalPages = totalPages
+
+                };
+            }
+            catch (Exception ex)
+            {
+                return new EventResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred: " + ex.Message + ".",
+                    Events = null
+                };
+            }
+        }
     }
 }
