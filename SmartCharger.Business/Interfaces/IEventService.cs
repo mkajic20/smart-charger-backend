@@ -8,5 +8,6 @@ namespace SmartCharger.Business.Interfaces
         Task<EventResponseDTO> GetFullChargingHistory(int page, int pageSize, string search);
         Task<EventResponseDTO> StartCharging(EventChargingDTO eventDTO);
         Task<EventResponseDTO> EndCharging(EventChargingDTO eventDTO);
+        Task<EventResponseDTO> GetStatistics(int year, int month, int chargerId);
     }
 }

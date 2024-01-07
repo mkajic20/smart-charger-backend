@@ -402,7 +402,119 @@ namespace SmartCharger.Test.ServicesTests
             }
         }
 
-        private void SetupDatabase(SmartChargerContext context)
+        [Fact]
+        public async Task GetStatistics_ChargerExists_ReturnsListOfPastChargings()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+               .UseInMemoryDatabase(databaseName: "StatisticsServiceDatabase1")
+               .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var eventService = new EventService(context);
+
+                // Act
+                EventResponseDTO result = await eventService.GetStatistics(2024, 1, 1);
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.StartsWith($"List of past chargings for charger ID 1", result.Message);
+                Assert.NotNull(result.Events);
+                Assert.Equal(result.Events[0].Volume, 123);
+
+            }
+        }
+
+        [Fact]
+        public async Task GetStatistics_ChargerDoesNotExist_ReturnsFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+               .UseInMemoryDatabase(databaseName: "StatisticsServiceDatabaseFail")
+               .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var eventService = new EventService(context);
+
+                // Act
+                EventResponseDTO result = await eventService.GetStatistics(2023, 5, 999);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal($"Charger with ID 999 doesn't exist.", result.Message);
+                Assert.Null(result.Events);
+            }
+        }
+
+        [Fact]
+        public async Task GetStatistics_NoPastChargings_ReturnsFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+               .UseInMemoryDatabase(databaseName: "StatisticsServiceDatabaseFail1")
+               .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var eventService = new EventService(context);
+
+                // Act
+                EventResponseDTO result = await eventService.GetStatistics(2024, 1, 3);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.StartsWith($"No past chargings found for charger ID 3", result.Message);
+                Assert.Null(result.Events);
+            }
+        }
+
+            [Fact]
+            public async Task GetStatistics_ExceptionThrown_ReturnsFailure()
+            {
+                // Arrange
+                var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                   .UseInMemoryDatabase(databaseName: "StatisticsServiceDatabaseFail2")
+                   .Options;
+
+                using (var context = new SmartChargerContext(options))
+                {
+                    SetupDatabase(context);
+             
+                }
+
+                using (var context = new SmartChargerContext(options))
+                {
+                var eventService = new EventService(context);
+
+                // Act
+                EventResponseDTO result = await eventService.GetStatistics(202323, 5, 1);
+
+                    // Assert
+                    Assert.False(result.Success);
+                    Assert.StartsWith("An error occurred:", result.Message);
+                    Assert.Null(result.Events);
+                }
+            }
+
+
+            private void SetupDatabase(SmartChargerContext context)
         {
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword("password123", salt);
