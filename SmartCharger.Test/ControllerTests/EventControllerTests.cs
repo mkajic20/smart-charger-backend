@@ -415,5 +415,141 @@ namespace SmartCharger.Test.ControllerTests
             Assert.Null(response.Events);
         }
 
+        [Fact]
+        public async Task GetPastChargings_ChargerDoesntExist_ReturnsBadRequest()
+        {
+            // Arrange
+            var eventServiceMock = new Mock<IEventService>();
+            eventServiceMock.Setup(service => service.GetStatistics(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(
+                new EventResponseDTO
+                {
+                    Success = false,
+                    Message = "Charger with ID 999 doesn't exist.",
+                    Events = null
+                });
+
+            var controller = new EventController(eventServiceMock.Object);
+
+            // Act
+            var actionResult = await controller.GetPastChargings(2024, 1, 999);
+
+            // Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult as BadRequestObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+            var response = result.Value as EventResponseDTO;
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Equal("Charger with ID 999 doesn't exist.", response.Message);
+            Assert.Null(response.Events);
+        }
+
+        [Fact]
+        public async Task GetPastChargings_NoPastChargings_ReturnsBadRequest()
+        {
+            // Arrange
+            var eventServiceMock = new Mock<IEventService>();
+            eventServiceMock.Setup(service => service.GetStatistics(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(
+                new EventResponseDTO
+                {
+                    Success = false,
+                    Message = "No past chargings found for charger ID 1 in siječanj 2024.",
+                    Events = null
+                });
+
+            var controller = new EventController(eventServiceMock.Object);
+
+            // Act
+            var actionResult = await controller.GetPastChargings(2024, 1, 1);
+
+            // Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult as BadRequestObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+            var response = result.Value as EventResponseDTO;
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Equal("No past chargings found for charger ID 1 in siječanj 2024.", response.Message);
+            Assert.Null(response.Events);
+        }
+
+        [Fact]
+        public async Task GetPastChargings_HasPastChargings_ReturnsOk()
+        {
+            // Arrange
+            var eventServiceMock = new Mock<IEventService>();
+            eventServiceMock.Setup(service => service.GetStatistics(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(
+                new EventResponseDTO
+                {
+                    Success = true,
+                    Message = "List of past chargings for charger ID 1 in siječanj 2024.",
+                    Events = new List<EventDTO>
+                    {
+                new EventDTO
+                {
+                    Id = 1,
+                    StartTime = DateTime.Now.ToUniversalTime(),
+                    EndTime = DateTime.Now.ToUniversalTime(),
+                    Volume = 123,
+                    User = new UserDTO
+                    {
+                        Id = 1,
+                        FirstName = "Ivo",
+                        LastName = "Ivic",
+                        Email = "iivic@example.com"
+                    },
+                    Charger = new ChargerDTO
+                    {
+                         Id = 1,
+                         Name = "New charger",
+                         Latitude = 50,
+                         Longitude = 40,
+                         CreationTime = DateTime.Now.ToUniversalTime(),
+                         Active = true,
+                         CreatorId = 1
+                    },
+                    Card = new CardDTO
+                    {
+                        Value = "RFID-ST34-56UV-7890",
+                        Active = true,
+                        Name = "Card 1",
+                        User = new UserDTO {
+                                Id = 1,
+                                FirstName = "Ivo",
+                                LastName = "Ivic",
+                                Email = "iivic@example.com"
+                        }
+                    }
+                }
+                    }
+                });
+
+            var controller = new EventController(eventServiceMock.Object);
+
+            // Act
+            var actionResult = await controller.GetPastChargings(2024, 1, 1);
+
+            // Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult as OkObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+            var response = result.Value as EventResponseDTO;
+            Assert.NotNull(response);
+            Assert.True(response.Success);
+            Assert.Equal("List of past chargings for charger ID 1 in siječanj 2024.", response.Message);
+            Assert.Equal(response.Events[0].Id, 1);
+            Assert.Equal(response.Events[0].Volume, 123);
+            Assert.Equal("Ivo", response.Events[0].User.FirstName);
+            Assert.Equal("Ivic", response.Events[0].User.LastName);
+            Assert.Equal("iivic@example.com", response.Events[0].User.Email);
+            Assert.Equal("Card 1", response.Events[0].Card.Name);
+            Assert.Equal("RFID-ST34-56UV-7890", response.Events[0].Card.Value);
+            Assert.Equal("New charger", response.Events[0].Charger.Name);
+            Assert.Equal(50, response.Events[0].Charger.Latitude);
+            Assert.Equal(40, response.Events[0].Charger.Longitude);
+        }
     }
 }
