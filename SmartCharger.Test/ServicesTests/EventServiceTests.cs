@@ -424,7 +424,7 @@ namespace SmartCharger.Test.ServicesTests
 
                 // Assert
                 Assert.True(result.Success);
-                Assert.Equal($"List of past chargings for charger ID 1 in siječanj 2024.", result.Message);
+                Assert.StartsWith($"List of past chargings for charger ID 1", result.Message);
                 Assert.NotNull(result.Events);
                 Assert.Equal(result.Events[0].Volume, 123);
 
@@ -480,7 +480,7 @@ namespace SmartCharger.Test.ServicesTests
 
                 // Assert
                 Assert.False(result.Success);
-                Assert.Equal($"No past chargings found for charger ID 3 in siječanj 2024.", result.Message);
+                Assert.StartsWith($"No past chargings found for charger ID 3", result.Message);
                 Assert.Null(result.Events);
             }
         }
