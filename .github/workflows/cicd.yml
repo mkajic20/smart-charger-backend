@@ -49,9 +49,4 @@ jobs:
       - name: Build docker image
         run: docker build -f SmartCharger/Dockerfile -t ${{secrets.REPO_NAME}} .
 
-      - name: Tag docker image
-        run: docker tag ${{secrets.REPO_NAME}}:latest ${{ secrets.DOCKER_USERNAME }}/${{secrets.REPO_NAME}}:latest
-
-      - name: Push docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{secrets.REPO_NAME}}:latest
  
