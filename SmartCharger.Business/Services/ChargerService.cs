@@ -295,5 +295,38 @@ namespace SmartCharger.Business.Services
             chargerEntity.Latitude = charger.Latitude;
             chargerEntity.Longitude = charger.Longitude;
         }
+
+        public async Task<ChargerResponseDTO> GetChargerById(int chargerId)
+        {
+            try
+            {
+
+                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargerId);
+                if (charger == null)
+                {
+                    return new ChargerResponseDTO
+                    {
+                        Success = false,
+                        Message = "Charger with that ID doesn't exist.",
+                        Charger = null
+                    };
+                }
+                return new ChargerResponseDTO
+                {
+                    Success = true,
+                    Message = $"Charger exists.",
+                    Charger = MapChargerToDTO(charger)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ChargerResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred: " + ex.Message,
+                    Charger = null
+                };
+            }
+        }
     }
 }
