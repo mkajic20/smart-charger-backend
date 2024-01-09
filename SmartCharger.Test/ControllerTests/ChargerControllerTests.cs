@@ -497,5 +497,71 @@ namespace SmartCharger.Test.ControllerTests
             Assert.Equal("Name of the charger cannot be empty.", response.Error);
 
         }
+
+        [Fact]
+        public async Task GetChargerById_WhenChargerServiceReturnsCharger_ShouldReturnOk()
+        {
+            // Arrange
+            var chargerServiceMock = new Mock<IChargerService>();
+            chargerServiceMock.Setup(service => service.GetChargerById(It.IsAny<int>())).ReturnsAsync(new ChargerResponseDTO
+            {
+                Success = true,
+                Message = "Charger exists.",
+                Charger = new ChargerDTO
+                {
+                    Id = 1,
+                    Name = "Charger 1",
+                    Latitude = 55,
+                    Longitude = 50,
+                }
+            });
+
+            var controller = new ChargerController(chargerServiceMock.Object);
+
+            // Act
+            var actionResult = await controller.GetChargerById(1);
+
+            // Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.Equal(200, result.StatusCode);
+            var response = result.Value as ChargerResponseDTO;
+            Assert.NotNull(response);
+            Assert.True(response.Success);
+            Assert.Equal("Charger exists.", response.Message);
+            Assert.Equal(1, response.Charger.Id);
+            Assert.Equal(55, response.Charger.Latitude);
+            Assert.Equal(50, response.Charger.Longitude);
+            Assert.Equal("Charger 1", response.Charger.Name);
+        }
+
+        [Fact]
+        public async Task GetChargerById_WhenChargerServiceReturnsNoCharger_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var chargerServiceMock = new Mock<IChargerService>();
+            chargerServiceMock.Setup(service => service.GetChargerById(It.IsAny<int>())).ReturnsAsync(new ChargerResponseDTO
+            {
+                Success = false,
+                Message = "Charger with that ID doesn't exist.",
+                Charger = null
+            });
+
+            var controller = new ChargerController(chargerServiceMock.Object);
+
+            // Act
+            var actionResult = await controller.GetChargerById(2);
+
+            // Assert
+            Assert.NotNull(actionResult);
+            var result = actionResult.Result as ObjectResult;
+            Assert.Equal(400, result.StatusCode);
+            var response = result.Value as ChargerResponseDTO;
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Equal("Charger with that ID doesn't exist.", response.Message);
+            Assert.Null(response.Charger);
+        }
+
     }
 }

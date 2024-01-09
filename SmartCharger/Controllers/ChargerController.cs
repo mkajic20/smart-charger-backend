@@ -70,5 +70,18 @@ namespace SmartCharger.Controllers
 
             return Ok(response);
         }
+
+        [Authorize(Policy = "Admin")]
+        [HttpGet("admin/chargers/{chargerId}")]
+        public async Task<ActionResult<IEnumerable<ChargerResponseDTO>>> GetChargerById(int chargerId)
+        {
+            ChargerResponseDTO response = await _chargerService.GetChargerById(chargerId);
+            if (response.Success == false)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

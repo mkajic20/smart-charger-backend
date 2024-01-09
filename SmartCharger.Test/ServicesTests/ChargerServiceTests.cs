@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SmartCharger.Test.ServicesTests
@@ -426,6 +427,66 @@ namespace SmartCharger.Test.ServicesTests
             }
 
         }
+
+        [Fact]
+        public async Task GetChargerById_WhenChargerExists_ShouldReturnCharger()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "ChargerServiceDatabaseGetById1")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupChargerDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var chargerService = new ChargerService(context);
+
+                // Act
+                ChargerResponseDTO result = await chargerService.GetChargerById(1);
+
+                // Assert
+                Assert.True(result.Success);
+                Assert.Equal("Charger exists.", result.Message);
+                Assert.NotNull(result.Charger);
+                Assert.Equal("Charger 1", result.Charger.Name);
+                Assert.Equal(1, result.Charger.Id);
+                Assert.Equal("Charger 1", result.Charger.Name);
+                Assert.Equal(40.7128, result.Charger.Latitude);
+                Assert.Equal(-74.0060, result.Charger.Longitude);
+            }
+        }
+
+        [Fact]
+        public async Task GetChargerById_WhenChargerDoesNotExist_ShouldReturnFailure()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<SmartChargerContext>()
+                .UseInMemoryDatabase(databaseName: "ChargerServiceDatabaseGetById")
+                .Options;
+
+            using (var context = new SmartChargerContext(options))
+            {
+                SetupChargerDatabase(context);
+            }
+
+            using (var context = new SmartChargerContext(options))
+            {
+                var chargerService = new ChargerService(context);
+
+                // Act
+                ChargerResponseDTO result = await chargerService.GetChargerById(3);
+
+                // Assert
+                Assert.False(result.Success);
+                Assert.Equal("Charger with that ID doesn't exist.", result.Message);
+                Assert.Null(result.Charger);
+            }
+        }
+
 
         private void SetupChargerDatabase(SmartChargerContext context)
         {
