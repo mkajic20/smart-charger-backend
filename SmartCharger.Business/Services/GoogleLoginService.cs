@@ -52,6 +52,15 @@ namespace SmartCharger.Business.Services
                 await _context.SaveChangesAsync();
             }
 
+            if (user.Active == false)
+            {
+                return new LoginResponseDTO
+                {
+                    Success = false,
+                    Message = "This account is disabled."
+                };
+            }
+
             var jwt = authService.GenerateJWT(user);
 
             if (jwt == null)
