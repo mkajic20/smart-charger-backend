@@ -45,6 +45,7 @@ namespace SmartCharger.Business.Services
                     LastName = googleUser.LastName,
                     RoleId = 2,
                     CreationTime = DateTime.UtcNow,
+                    Active = true,
                 };
 
                 await _context.Users.AddAsync(user);
