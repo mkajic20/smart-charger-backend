@@ -48,7 +48,7 @@ using SmartCharger.Business.Interfaces;
                     return new LoginResponseDTO
                     {
                         Success = false,
-                        Message = "Invalid access token."
+                        Message = "Invalid authorization code."
                     };
                 }
 
@@ -68,7 +68,7 @@ using SmartCharger.Business.Interfaces;
                 return new LoginResponseDTO
                 {
                     Success = false,
-                    Message = "Invalid access token."
+                    Message = "Invalid authorization code."
                 };
             }
             catch (Exception ex)
