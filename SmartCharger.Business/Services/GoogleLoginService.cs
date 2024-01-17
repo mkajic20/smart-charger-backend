@@ -1,6 +1,4 @@
-﻿using Google.Apis.Auth;
-using Google.Apis.Oauth2.v2;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartCharger.Business.DTOs;
 using SmartCharger.Business.Interfaces;
 using SmartCharger.Data;
@@ -9,7 +7,7 @@ using SmartCharger.Data.Entities;
 
 namespace SmartCharger.Business.Services
 {
-    public class GoogleLoginService : IGoogleLoginService 
+    public class GoogleLoginService : IGoogleLoginService
     {
         private readonly SmartChargerContext _context;
         private readonly IGoogleAuthService _googleAuthService;
@@ -21,11 +19,11 @@ namespace SmartCharger.Business.Services
 
         }
 
-        public async Task<LoginResponseDTO> LoginWithGoogleAsync(string accessToken)
+        public async Task<LoginResponseDTO> LoginWithGoogleAsync(string authorizationCode)
         {
             AuthService authService = new AuthService();
 
-            var response = await _googleAuthService.GetUserInfoAsync(accessToken);
+            var response = await _googleAuthService.GetUserInfoFromAuthCodeAsync(authorizationCode);
 
             if (!response.Success)
             {
@@ -36,12 +34,15 @@ namespace SmartCharger.Business.Services
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == googleUser.Email);
 
+            var nameParts = googleUser.FirstName.Split(' ');
+            var firstName = nameParts[0];
+
             if (user == null)
             {
                 user = new User
                 {
                     Email = googleUser.Email,
-                    FirstName = googleUser.FirstName,
+                    FirstName = firstName,
                     LastName = googleUser.LastName,
                     RoleId = 2,
                     CreationTime = DateTime.UtcNow,
@@ -88,4 +89,3 @@ namespace SmartCharger.Business.Services
     }
 
 }
-

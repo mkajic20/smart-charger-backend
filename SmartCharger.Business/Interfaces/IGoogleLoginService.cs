@@ -5,6 +5,6 @@ namespace SmartCharger.Business.Interfaces
 {
     public interface IGoogleLoginService
     {
-        Task<LoginResponseDTO> LoginWithGoogleAsync(string googleLoginDTO);
+        Task<LoginResponseDTO> LoginWithGoogleAsync(string authorizationCode);
     }
 }
