@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartCharger.Business.DTOs;
 using SmartCharger.Business.Interfaces;
-using System.Threading.Tasks;
 
 namespace SmartCharger.Controllers
 {
@@ -17,9 +16,9 @@ namespace SmartCharger.Controllers
         }
 
         [HttpPost("login/google")]
-        public async Task<IActionResult> LoginWithGoogle([FromBody] string accessToken)
+        public async Task<IActionResult> LoginWithGoogle([FromBody] string authorizationCode)
         {
-           LoginResponseDTO loginResult = await _googleLoginService.LoginWithGoogleAsync(accessToken);
+           LoginResponseDTO loginResult = await _googleLoginService.LoginWithGoogleAsync(authorizationCode);
 
             if (loginResult.Success == true)
             {

@@ -56,10 +56,6 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
     };
-}).AddGoogle(options =>
-{
-    options.ClientId = "223586710221-3808p3ltsqf0e42ge6jun8mibsa2dt3k.apps.googleusercontent.com";
-    options.ClientSecret = "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";
 });
 
 

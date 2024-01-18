@@ -18,7 +18,7 @@ namespace SmartCharger.Test.ServicesTests
                 .Options;
 
             var googleAuthServiceMock = new Mock<IGoogleAuthService>();
-            googleAuthServiceMock.Setup(service => service.GetUserInfoAsync(It.IsAny<string>()))
+            googleAuthServiceMock.Setup(service => service.GetUserInfoFromAuthCodeAsync(It.IsAny<string>()))
                 .ReturnsAsync(new LoginResponseDTO
                 {
                     Success = true,
@@ -54,7 +54,7 @@ namespace SmartCharger.Test.ServicesTests
                 .Options;
 
             var googleAuthServiceMock = new Mock<IGoogleAuthService>();
-            googleAuthServiceMock.Setup(service => service.GetUserInfoAsync(It.IsAny<string>()))
+            googleAuthServiceMock.Setup(service => service.GetUserInfoFromAuthCodeAsync(It.IsAny<string>()))
                 .ReturnsAsync(new LoginResponseDTO
                 {
                     Success = false,
