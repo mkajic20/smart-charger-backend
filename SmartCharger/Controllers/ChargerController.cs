@@ -19,7 +19,6 @@ namespace SmartCharger.Controllers
         }
 
 
-        [Authorize(Policy = "AdminOrCustomer")]
         [HttpGet("chargers")]
         public async Task<ActionResult<IEnumerable<ChargerResponseDTO>>> GetAllChargers([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string search = null)
         {
