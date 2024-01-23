@@ -53,7 +53,7 @@ namespace SmartCharger.Business.Services
 
 
                 var events = await query
-                  .OrderBy(e => e.Id)
+                  .OrderByDescending(e => e.EndTime)
                   .Skip((page - 1) * pageSize)
                   .Take(pageSize)
                   .Select(e => new EventDTO
@@ -312,7 +312,7 @@ namespace SmartCharger.Business.Services
 
 
                 var events = await query
-                  .OrderBy(e => e.Id)
+                  .OrderByDescending(e => e.EndTime)
                   .Skip((page - 1) * pageSize)
                   .Take(pageSize)
                   .Select(e => new EventDTO
