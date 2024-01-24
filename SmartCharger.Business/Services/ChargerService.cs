@@ -52,7 +52,7 @@ namespace SmartCharger.Business.Services
                     Latitude = charger.Latitude,
                     Longitude = charger.Longitude,
                     Active = false,
-                    CreationTime = DateTime.Now.ToUniversalTime(),
+                    CreationTime = DateTime.Now.ToUniversalTime().AddHours(1),
                     CreatorId = charger.CreatorId
                 };
 
