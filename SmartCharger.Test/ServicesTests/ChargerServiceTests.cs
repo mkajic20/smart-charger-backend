@@ -176,10 +176,10 @@ namespace SmartCharger.Test.ServicesTests
                 Assert.Equal("List of chargers.", result.Message);
                 Assert.NotNull(result.Chargers);
                 Assert.Equal(2, result.Chargers.Count);
-                Assert.Equal("Charger 1", result.Chargers[0].Name);
-                Assert.Equal(1, result.Chargers[0].Id);
-                Assert.Equal("Charger 2", result.Chargers[1].Name);
-                Assert.Equal(2, result.Chargers[1].Id);
+                Assert.Equal("Charger 2", result.Chargers[0].Name);
+                Assert.Equal(2, result.Chargers[0].Id);
+                Assert.Equal("Charger 1", result.Chargers[1].Name);
+                Assert.Equal(1, result.Chargers[1].Id);
             }
         }
 
