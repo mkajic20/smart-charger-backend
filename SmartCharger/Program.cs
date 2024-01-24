@@ -114,7 +114,11 @@ builder.Services.AddScoped<IGoogleLoginService, GoogleLoginService>();
 var app = builder.Build();
 
 
-
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetService<SmartChargerContext>();
+    await context.Database.MigrateAsync();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
