@@ -237,6 +237,7 @@ namespace SmartCharger.Business.Services
 
                 chargingEvent.Charger.Active = false;
                 chargingEvent.Card.UsageStatus = false;
+                chargingEvent.Charger.LastSync = eventDTO.EndTime;
 
                 Event selectedEvent = new Event
                 {
