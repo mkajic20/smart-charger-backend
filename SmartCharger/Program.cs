@@ -8,7 +8,19 @@ using SmartCharger.Business.Services;
 using SmartCharger.Data;
 using System.Text;
 
+
+string GetEnvironment()
+{
+    var isRender = Environment.GetEnvironmentVariable("RENDER") == "true";
+    return isRender ? "production" : "development";
+}
+
+var environment = GetEnvironment();
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile(environment == "production" ? "appsettings.json" : "appsettings.Development.json", optional: false);
+
 
 // Add services to the container.
 
@@ -46,6 +58,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+    options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -73,7 +86,19 @@ builder.Services.AddAuthorization(options =>
 });
 
 
-builder.Services.AddDbContext<SmartChargerContext>(option => option.UseNpgsql(builder.Configuration.GetConnectionString("connection")));
+builder.Services.AddDbContext<SmartChargerContext>(options =>
+{
+    if (environment == "production")
+    {
+        options.UseNpgsql(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
+    }
+    else
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("Connection"));
+
+    }
+
+});
 builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -88,8 +113,12 @@ builder.Services.AddScoped<IGoogleLoginService, GoogleLoginService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetService<SmartChargerContext>();
+    await context.Database.MigrateAsync();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -98,6 +127,7 @@ app.UseCors(c => c.AllowAnyHeader().WithMethods("GET", "PUT", "POST", "PATCH", "
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

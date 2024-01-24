@@ -183,7 +183,7 @@ namespace SmartCharger.Business.Services
                 }
 
                 var chargers = await query
-                    .OrderBy(c => c.Id)
+                    .OrderByDescending(c => c.CreationTime)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(c => new ChargerDTO
