@@ -15,6 +15,6 @@ namespace SmartCharger.Data.Entities
         [ForeignKey(nameof(User))]
         public int CreatorId { get; set; }
         public virtual User User { get; set; }
-
+        public bool IsDeleted { get; set; }
     }
 }
