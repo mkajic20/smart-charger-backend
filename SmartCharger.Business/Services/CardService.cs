@@ -50,6 +50,7 @@ namespace SmartCharger.Business.Services
                 var cards = await query
                     .OrderBy(c => c.Id)
                     .Include(c => c.User)
+                    .Where(c => c.IsDeleted == false)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(c => new CardDTO
@@ -93,6 +94,7 @@ namespace SmartCharger.Business.Services
             {
                 var card = await _context.Cards
                     .Include(c => c.User)
+                    .Where(c => c.IsDeleted == false)
                     .FirstOrDefaultAsync(c => c.Id == cardId);
 
                 if (card == null)
@@ -129,6 +131,7 @@ namespace SmartCharger.Business.Services
             {
                 var card = await _context.Cards
                     .Include(c => c.User)
+                    .Where(c => c.IsDeleted == false)
                     .FirstOrDefaultAsync(c => c.Id == cardId);
 
                 if (card == null)
@@ -170,6 +173,7 @@ namespace SmartCharger.Business.Services
             {
                 var card = await _context.Cards
                     .Include(c => c.User)
+                    .Where(c => c.IsDeleted == false)
                     .FirstOrDefaultAsync(c => c.Id == cardId);
 
                 if (card == null)
@@ -182,7 +186,8 @@ namespace SmartCharger.Business.Services
                     };
                 }
 
-                _context.Cards.Remove(card);
+                card.IsDeleted = true;
+                _context.Cards.Update(card);
                 await _context.SaveChangesAsync();
 
                 return new CardsResponseDTO
@@ -209,7 +214,7 @@ namespace SmartCharger.Business.Services
             try
             {
                 var cards = await _context.Cards
-                    .Where(c => c.UserId == userId)
+                    .Where(c => c.UserId == userId && c.IsDeleted == false)
                     .Select(c => new CardDTO
                     {
                         Id = c.Id,
@@ -261,7 +266,7 @@ namespace SmartCharger.Business.Services
             try
             {
                 var card = await _context.Cards
-                    .Where(c => c.UserId == userId)
+                    .Where(c => c.UserId == userId && c.IsDeleted == false)
                     .Include(c => c.User)
                     .FirstOrDefaultAsync(c => c.Id == cardId);
 
@@ -340,7 +345,9 @@ namespace SmartCharger.Business.Services
                     UserId = user.Id
                 };
 
-                var cardExists = await _context.Cards.AnyAsync(c => c.Value == card.Value);
+                var cardExists = await _context.Cards
+                    .Where(c => c.Value == card.Value && c.IsDeleted == false)
+                    .AnyAsync();
                 if (cardExists)
                 {
                     return new CardsResponseDTO
@@ -389,7 +396,7 @@ namespace SmartCharger.Business.Services
             try
             {
                 var card = await _context.Cards
-                    .Where(c => c.UserId == userId)
+                    .Where(c => c.UserId == userId && c.IsDeleted == false)
                     .FirstOrDefaultAsync(c => c.Id == cardId);
 
                 if (card == null)
@@ -402,7 +409,8 @@ namespace SmartCharger.Business.Services
                     };
                 }
 
-                _context.Cards.Remove(card);
+                card.IsDeleted = true;
+                _context.Cards.Update(card);
                 await _context.SaveChangesAsync();
 
                 return new CardsResponseDTO
@@ -430,6 +438,7 @@ namespace SmartCharger.Business.Services
             {
                 var card = await _context.Cards
                     .Include(c => c.User)
+                    .Where(c => c.IsDeleted == false)
                     .FirstOrDefaultAsync(c => c.Value == cardValue);
 
                 if (card == null)

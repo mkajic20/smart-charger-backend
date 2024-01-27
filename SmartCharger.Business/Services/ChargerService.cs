@@ -117,7 +117,9 @@ namespace SmartCharger.Business.Services
         {
             try
             {
-                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargerId);
+                var charger = await _context.Chargers
+                    .Where(c => c.Id == chargerId && c.IsDeleted == false)
+                    .SingleOrDefaultAsync();
                 if (charger == null)
                 {
                     return new ChargerResponseDTO
@@ -129,9 +131,8 @@ namespace SmartCharger.Business.Services
                     };
                 }
 
-
-
-                _context.Chargers.Remove(charger);
+                charger.IsDeleted = true;
+                _context.Chargers.Update(charger);
                 await _context.SaveChangesAsync();
 
                 return new ChargerResponseDTO
@@ -184,6 +185,7 @@ namespace SmartCharger.Business.Services
 
                 var chargers = await query
                     .OrderByDescending(c => c.CreationTime)
+                    .Where(c => c.IsDeleted == false)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(c => new ChargerDTO
@@ -225,7 +227,9 @@ namespace SmartCharger.Business.Services
         {
             try
             {
-                var chargerEntity = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargerId);
+                var chargerEntity = await _context.Chargers
+                    .Where(c => c.Id == chargerId && c.IsDeleted == false)
+                    .SingleOrDefaultAsync();
                 if (chargerEntity == null)
                 {
                     return new ChargerResponseDTO
@@ -301,7 +305,9 @@ namespace SmartCharger.Business.Services
             try
             {
 
-                var charger = await _context.Chargers.SingleOrDefaultAsync(c => c.Id == chargerId);
+                var charger = await _context.Chargers
+                    .Where(c => c.Id == chargerId && c.IsDeleted == false)
+                    .SingleOrDefaultAsync();
                 if (charger == null)
                 {
                     return new ChargerResponseDTO
