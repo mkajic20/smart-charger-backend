@@ -1,0 +1,52 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - 'develop'
+      - 'main'
+  pull_request:
+    branches:
+      - 'develop'
+      - 'main'   
+
+  
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up NuGet
+        uses: NuGet/setup-nuget@v1.2.0
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.3.1
+      
+      - name: Navigate to Workspace
+        run: cd $GITHUB_WORKSPACE
+
+      - name: List Directories
+        run: dir
+  
+      - name: Restore NuGet packages for backend
+        run: nuget restore SmartCharger.sln
+
+      - name: Restore NuGet packages for unit tests
+        run: nuget restore SmartCharger.Test/SmartCharger.Test.csproj
+
+      - name: Build Backend
+        run: msbuild SmartCharger.sln /p:platform="Any CPU" /p:configuration=Release
+
+      - name: Run Unit Tests
+        run: dotnet test SmartCharger.Test/SmartCharger.Test.csproj --configuration Release
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build docker image
+        run: docker build -f SmartCharger/Dockerfile -t ${{secrets.REPO_NAME}} .
+
+ 
